@@ -310,10 +310,7 @@ private:
 
 public:
     /**
-     * DFA constructor.
-     * @param nfa
-     * @param start_state
-     */
+     * 
     DFA(vector<unordered_map<char, string>> &nfa, int start_state, unordered_map<int, string> &accepted,
         unordered_map<int, int> &priority) {
         this->nfa = convert_nfa(nfa);
