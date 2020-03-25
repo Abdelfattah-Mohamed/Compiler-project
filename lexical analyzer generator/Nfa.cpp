@@ -5,114 +5,177 @@
 #include <vector>
 using namespace std;
 
+vector<unordered_map<char, string>> all_states;
+
+//2 Nfas are ored (|)
+std::pair<int, int> reg_nfa_op1(pair<int, int> nfa1, pair<int, int> nfa2)
+{
+
+    int size1 = all_states.size();
+
+    unordered_map<char, string> temp;
+    string s = to_string(nfa1.first) + "," + to_string(nfa2.first);
+    temp.insert(pair<char, string>(' ', s));
+    all_states.push_back(temp);
+    temp.clear();
+    unordered_map<char, string> &state1 = all_states[nfa1.second];
+    unordered_map<char, string> &state2 = all_states[nfa2.second];
+
+    if (state1.count(' ') > 0)
+    {
+        string s1 = state1[' '] + "," + to_string(all_states.size());
+        state1.insert(pair<char, string>(' ', s1));
+    }
+    else
+    {
+        state1.insert(pair<char, string>(' ', to_string(all_states.size())));
+    }
+    if (state2.count(' ') > 0)
+    {
+        string s2 = state2[' '] + "," + to_string(all_states.size());
+        state2.insert(pair<char, string>(' ', s2));
+    }
+    else
+    {
+        state2.insert(pair<char, string>(' ', to_string(all_states.size())));
+    }
+    unordered_map<char, string> Accept_s;
+    all_states.push_back(Accept_s);
+    return std::make_pair(size1, all_states.size() - 1);
+}
+
+std::pair<int, int> reg_nfa_op2(pair<int, int> nfa1, pair<int, int> nfa2)
+{
+
+    int size1 = all_states.size();
+
+    unordered_map<char, string> temp;
+    temp.insert(pair<char, string>(' ', to_string(nfa1.first)));
+    all_states.push_back(temp);
+    temp.clear();
+    unordered_map<char, string> &state1 = all_states[nfa1.second];
+    if (state1.count(' ') > 0)
+    {
+        string s1 = state1[' '] + "," + to_string(nfa2.first);
+        state1.insert(pair<char, string>(' ', s1));
+    }
+    else
+    {
+        state1.insert(pair<char, string>(' ', to_string(nfa2.first)));
+    }
+    unordered_map<char, string> &state2 = all_states[nfa2.second];
+    if (state2.count(' ') > 0)
+    {
+        string s2 = state2[' '] + "," + to_string(all_states.size());
+        state2.insert(pair<char, string>(' ', s2));
+    }
+    else
+    {
+        state2.insert(pair<char, string>(' ', to_string(all_states.size())));
+    }
+
+    unordered_map<char, string> Accept_s;
+    all_states.push_back(Accept_s);
+
+    return std::make_pair(size1, all_states.size() - 1);
+}
+
+std::pair<int, int> reg_nfa_op3(pair<int, int> nfa1)
+{
+
+    int size1 = all_states.size();
+
+    unordered_map<char, string> temp;
+    string s1 = to_string(nfa1.first) + "," + to_string(all_states.size() + 1);
+    temp.insert(pair<char, string>(' ', s1));
+    all_states.push_back(temp);
+    unordered_map<char, string> &state1 = all_states[nfa1.second];
+
+    if (state1.count(' ') > 0)
+    {
+        string s2 = state1[' '] + "," + to_string(all_states.size()) + "," + to_string(nfa1.first);
+        state1.insert(pair<char, string>(' ', s2));
+    }
+    else
+    {
+        string s2 = to_string(all_states.size()) + "," + to_string(nfa1.first);
+        state1.insert(pair<char, string>(' ', s2));
+    }
+
+    unordered_map<char, string> Accept_s;
+    all_states.push_back(Accept_s);
+
+    return std::make_pair(size1, all_states.size() - 1);
+}
+
+std::pair<int, int> reg_nfa_op4(pair<int, int> nfa1)
+{
+
+    int size1 = all_states.size();
+
+    unordered_map<char, string> temp;
+    temp.insert(pair<char, string>(' ', to_string(nfa1.first)));
+    all_states.push_back(temp);
+    unordered_map<char, string> &state1 = all_states[nfa1.second];
+
+    if (state1.count(' ') > 0)
+    {
+        string s = state1[' '] + "," + to_string(all_states.size()) + "," + to_string(nfa1.first);
+        state1.insert(pair<char, string>(' ', s));
+    }
+    else
+    {
+        string s = to_string(all_states.size()) + "," + to_string(nfa1.first);
+        state1.insert(pair<char, string>(' ', s));
+    }
+
+    unordered_map<char, string> Accept_s;
+    all_states.push_back(Accept_s);
+
+    return std::make_pair(size1, all_states.size() - 1);
+}
+
+std::pair<int, int> reg_nfa_op5(char range1, char range2)
+{
+
+    int size1 = all_states.size();
+
+    unordered_map<char, string> temp;
+
+    int r = (int(range2) - int(range1));
+    
+    for (int i = 0; i <= r ; i++)
+    {
+        
+        temp.insert(pair<char, string>(range1, to_string(size1 + 1)));
+        range1 += 1;
+    }
+    all_states.push_back(temp);
+    unordered_map<char, string> Accept_s;
+    all_states.push_back(Accept_s);
+
+    return std::make_pair(size1, all_states.size() - 1);
+}
+
 int main()
 {
 
-    map<char, string> state;
-    vector<map<char, string>> dfaa;
+    /*unordered_map<char, string> temp;
+    temp.insert(pair<char, string>('a', "1"));
+    all_states.push_back(temp);
+    all_states.push_back(unordered_map<char, string>());
+    temp.clear();
+    temp.insert(pair<char, string>('b', "3"));
+    all_states.push_back(temp);
+    all_states.push_back(unordered_map<char, string>());*/
 
-    /*dfaa.insert(std::pair<string, string>("sss", "Jon"));
+    pair<int, int> t1(0, 1);
+    pair<int, int> t2(2, 3);
 
-    for (map<string, string>::iterator iter = dfaa.begin(); iter != dfaa.end(); ++iter)
-    { q
-        cout << (*iter).first << ": " << (*iter).second << endl;
-    }*/
-    char a = 'a';
-    a += 1;
-    cout << a;
+    pair<int, int> t3 = reg_nfa_op5('0','3');
+
+    cout << all_states[0][' '] << " " << all_states[0]['0'] << " " << all_states[0]['1'] << " " <<all_states[0]['2'] << " " << all_states[0]['3'] << endl;
+    cout << t3.first << t3.second << endl;
 
     return 0;
-}
-
-std::pair<int, int> reg_nfa_op1(string str, vector<map<char, string>> nfa1, vector<map<char, string>> nfa2)
-{
-    vector<map<char, string>> nfaa;
-    map<char, string> temp;
-    temp.insert(pair<char, string>(' ', "13"));
-    nfaa.push_back(temp);
-    temp.clear();
-    temp.insert(pair<char, string>('a', "2"));
-    nfaa.push_back(temp);
-    temp.clear();
-    temp.insert(pair<char, string>(' ', "5"));
-    nfaa.push_back(temp);
-    temp.clear();
-    temp.insert(pair<char, string>('b', "4"));
-    nfaa.push_back(temp);
-    temp.clear();
-    temp.insert(pair<char, string>(' ', "5"));
-    nfaa.push_back(temp);
-    temp.clear();
-    nfaa.push_back(temp);
-
-    return std::make_pair(0, nfaa.size());
-}
-
-std::pair<int, int> reg_nfa_op2(string str, vector<map<char, string>> nfa1, vector<map<char, string>> nfa2)
-{
-    vector<map<char, string>> nfaa1;
-    map<char, string> temp1;
-    temp1.insert(pair<char, string>('a', "1"));
-    nfaa1.push_back(temp1);
-    temp1.clear();
-    temp1.insert(pair<char, string>('b', "2"));
-    nfaa1.push_back(temp1);
-    temp1.clear();
-    nfaa1.push_back(temp1);
-
-    return std::make_pair(0, nfaa1.size());
-}
-
-std::pair<int, int> reg_nfa_op3(string str, vector<map<char, string>> nfa1, vector<map<char, string>> nfa2)
-{
-    vector<map<char, string>> nfaa2;
-    map<char, string> temp2;
-    temp2.insert(pair<char, string>(' ', "13"));
-    nfaa2.push_back(temp2);
-    temp2.clear();
-    temp2.insert(pair<char, string>('a', "2"));
-    nfaa2.push_back(temp2);
-    temp2.clear();
-    temp2.insert(pair<char, string>(' ', "31"));
-    nfaa2.push_back(temp2);
-    temp2.clear();
-    nfaa2.push_back(temp2);
-
-    return std::make_pair(0, nfaa2.size());
-}
-
-std::pair<int, int> reg_nfa_op4(string str, vector<map<char, string>> nfa1, vector<map<char, string>> nfa2)
-{
-    vector<map<char, string>> nfaa3;
-    map<char, string> temp3;
-    temp3.insert(pair<char, string>(' ', "1"));
-    nfaa3.push_back(temp3);
-    temp3.clear();
-    temp3.insert(pair<char, string>('a', "2"));
-    nfaa3.push_back(temp3);
-    temp3.clear();
-    temp3.insert(pair<char, string>(' ', "31"));
-    nfaa3.push_back(temp3);
-    temp3.clear();
-    nfaa3.push_back(temp3);
-
-    return std::make_pair(0, nfaa3.size());
-}
-
-std::pair<int, int> reg_nfa_op5(string str, vector<map<char, string>> nfa1, vector<map<char, string>> nfa2)
-{
-    char range1 = '0';
-    char range2 = '9';
-    vector<map<char, string>> nfaa4;
-    map<char, string> temp4;
-    for (int i = 0; i < int(range2) - int(range1); i++)
-    {
-
-        temp4.insert(pair<char, string>(range1, to_string(i + 1)));
-        nfaa4.push_back(temp4);
-        temp4.clear();
-        range1 += 1;
-    }
-
-    return std::make_pair(0, nfaa4.size());
 }
