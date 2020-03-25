@@ -1,7 +1,3 @@
-#include <bits/stdc++.h>
-
-using namespace std;
-
 class DFA {
 private:
     // nfa
@@ -44,7 +40,7 @@ private:
         vector<string> result;
         string temp = "";
         for (char c : s) {
-            if (c == ',' && !temp.empty()) result.push_back(temp);
+            if (c == ',' && !temp.empty()) result.push_back(temp), temp = "";
             else temp += c;
         }
         vector<int> ret;
@@ -310,7 +306,10 @@ private:
 
 public:
     /**
-     * 
+     * DFA constructor.
+     * @param nfa
+     * @param start_state
+     */
     DFA(vector<unordered_map<char, string>> &nfa, int start_state, unordered_map<int, string> &accepted,
         unordered_map<int, int> &priority) {
         this->nfa = convert_nfa(nfa);
@@ -343,4 +342,8 @@ public:
 
         cout << this->final_dfa.size();
     }
+
+    vector<unordered_map<char, int>> get_dfa() return this->final_dfa;
+    unordered_map<int, string> get_accept_states() return accept_state_dfa_mini;
+
 };
