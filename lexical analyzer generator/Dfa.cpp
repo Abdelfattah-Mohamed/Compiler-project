@@ -1,118 +1,346 @@
 #include <bits/stdc++.h>
-#include <map>
-#include <utility>
-#include <string.h>
-#include <vector>
+
 using namespace std;
 
-int main()
-{
+class DFA {
+private:
+    // nfa
+    vector<vector<vector<int>>>
+    nfa;
+    int nfa_start_state;
+    unordered_map<int, string> accept_state_nfa;
+    unordered_map<int, int> accept_priority;
+    unordered_map<char, int> input_col;
 
-    map<char, string> state;
-    vector<map<char, string>> dfaa;
+    // dfa
+    vector<vector<int>> dfa;
+    vector<int> dfa_start_state;
+    unordered_map<int, string> accept_state_dfa;
+    unordered_map<int, int> accept_priority_dfa;
 
-    /*dfaa.insert(std::pair<string, string>("sss", "Jon"));
+    // dfa mini
+    vector<vector<int>> dfa_mini;
+    unordered_map<int, string> accept_state_dfa_mini;
+    unordered_map<int, int> accept_priority_dfa_mini;
 
-    for (map<string, string>::iterator iter = dfaa.begin(); iter != dfaa.end(); ++iter)
-    { q
-        cout << (*iter).first << ": " << (*iter).second << endl;
-    }*/
-    char a = 'a';
-    a += 1;
-    cout << a;
+    vector<unordered_map<char, int>> final_dfa;
 
-    return 0;
-}
+    // private usage
+    unordered_map<string, int> mp;
 
-std::pair<int, int> reg_nfa_op1(string str, vector<map<char, string>> nfa1, vector<map<char, string>> nfa2)
-{
-    vector<map<char, string>> nfaa;
-    map<char, string> temp;
-    temp.insert(pair<char, string>(' ', "13"));
-    nfaa.push_back(temp);
-    temp.clear();
-    temp.insert(pair<char, string>('a', "2"));
-    nfaa.push_back(temp);
-    temp.clear();
-    temp.insert(pair<char, string>(' ', "5"));
-    nfaa.push_back(temp);
-    temp.clear();
-    temp.insert(pair<char, string>('b', "4"));
-    nfaa.push_back(temp);
-    temp.clear();
-    temp.insert(pair<char, string>(' ', "5"));
-    nfaa.push_back(temp);
-    temp.clear();
-    nfaa.push_back(temp);
-
-    return std::make_pair(0, nfaa.size());
-}
-
-std::pair<int, int> reg_nfa_op2(string str, vector<map<char, string>> nfa1, vector<map<char, string>> nfa2)
-{
-    vector<map<char, string>> nfaa1;
-    map<char, string> temp1;
-    temp1.insert(pair<char, string>('a', "1"));
-    nfaa1.push_back(temp1);
-    temp1.clear();
-    temp1.insert(pair<char, string>('b', "2"));
-    nfaa1.push_back(temp1);
-    temp1.clear();
-    nfaa1.push_back(temp1);
-
-    return std::make_pair(0, nfaa1.size());
-}
-
-std::pair<int, int> reg_nfa_op3(string str, vector<map<char, string>> nfa1, vector<map<char, string>> nfa2)
-{
-    vector<map<char, string>> nfaa2;
-    map<char, string> temp2;
-    temp2.insert(pair<char, string>(' ', "13"));
-    nfaa2.push_back(temp2);
-    temp2.clear();
-    temp2.insert(pair<char, string>('a', "2"));
-    nfaa2.push_back(temp2);
-    temp2.clear();
-    temp2.insert(pair<char, string>(' ', "31"));
-    nfaa2.push_back(temp2);
-    temp2.clear();
-    nfaa2.push_back(temp2);
-
-    return std::make_pair(0, nfaa2.size());
-}
-
-std::pair<int, int> reg_nfa_op4(string str, vector<map<char, string>> nfa1, vector<map<char, string>> nfa2)
-{
-    vector<map<char, string>> nfaa3;
-    map<char, string> temp3;
-    temp3.insert(pair<char, string>(' ', "1"));
-    nfaa3.push_back(temp3);
-    temp3.clear();
-    temp3.insert(pair<char, string>('a', "2"));
-    nfaa3.push_back(temp3);
-    temp3.clear();
-    temp3.insert(pair<char, string>(' ', "31"));
-    nfaa3.push_back(temp3);
-    temp3.clear();
-    nfaa3.push_back(temp3);
-
-    return std::make_pair(0, nfaa3.size());
-}
-
-std::pair<int, int> reg_nfa_op5(string str, vector<map<char, string>> nfa1, vector<map<char, string>> nfa2)
-{
-    char range1 = '0';
-    char range2 = '9';
-    vector<map<char, string>> nfaa4;
-    map<char, string> temp4;
-    for (int i = 0; i < int(range2) - int(range1); i++)
-    {
-
-        temp4.insert(pair<char, string>(range1, to_string(i + 1)));
-        nfaa4.push_back(temp4);
-        temp4.clear();
-        range1 += 1;
+    vector<vector<vector<int>>> convert_nfa(vector<unordered_map<char, string>> &temp_nfa) {
+        int n = temp_nfa.size();
+        vector<vector<vector<int>>> temp(n, vector<vector<int>>(130));
+        for(int i = 0; i < n; i++) {
+            for(auto y : temp_nfa[i]) {
+                if(y.first != ' ') temp[i][(int) y.first] = conv_string_to_vector(y.second);
+                else temp[i][0] = conv_string_to_vector(y.second);
+            }
+        }
+        return temp;
     }
 
-    return std::make_pair(0, nfaa4.size());
-}
+    vector<int> conv_string_to_vector(string s) {
+        vector<string> result;
+        string temp = "";
+        for (char c : s) {
+            if (c == ',' && !temp.empty()) result.push_back(temp);
+            else temp += c;
+        }
+        vector<int> ret;
+        for (string x : result) ret.push_back(stoi(x));
+        return ret;
+    }
+
+    /**
+     * description: getting vector of starting state for dfa (set of state that's can reach by eps).
+     * @return vector<int> starting state.
+     */
+    vector<int> get_starting_state() {
+        vector<int> temp;
+        temp.push_back(this->nfa_start_state);
+        return get_epsClosure(temp);
+    }
+
+    /**
+     * Description: get eps Closure of current state (vector of nfa states thats is new dfa state.)
+     * @param state
+     * @return vector<int> eps
+     */
+    vector<int> get_epsClosure(vector<int> &state) {
+        int n = nfa.size();
+        vector<bool> visited(n, false);
+        vector<int> eps;
+        queue<int> que;
+        for (int x : state) {
+            eps.push_back(x);
+            visited[x] = true;
+            que.push(x);
+        }
+        while (!que.empty()) {
+            int curr = que.front();
+            que.pop();
+            // assumption : eps trans. at col. 0;
+            vector<int> temp = nfa[curr][0];
+            for (int x : temp) {
+                if (!visited[x]) {
+                    visited[x] = true;
+                    eps.push_back(x);
+                    que.push(x);
+                }
+            }
+        }
+        sort(eps.begin(), eps.end());
+        return eps;
+    }
+
+    /**
+     * fill dfa matrix for transitions.
+     * @param start
+     */
+    void build_DFA(vector<int> &start) {
+        int curr_state = 0;
+        string state = conv_vec_to_str(start);
+        mp[state] = curr_state;
+        curr_state++;
+        queue<vector<int>> que;
+        que.push(start);
+        int row = 0;
+        while (!que.empty()) {
+            vector<int> curr = que.front();
+            add_if_accept(curr, row);
+            que.pop();
+            vector<int> dfa_row;
+            dfa_row.push_back(-1);
+            for (int i = 1; i < nfa[0].size(); i++) {
+                vector<int> first = get_all_to(curr, i);
+                vector<int> second = get_epsClosure(first);
+                sort(second.begin(), second.end());
+                state = conv_vec_to_str(second);
+                if (mp.count(state)) dfa_row.push_back(mp[state]);
+                else {
+                    dfa_row.push_back(curr_state);
+                    mp[state] = curr_state;
+                    curr_state++;
+                    que.push(second);
+                }
+            }
+            if(accept_state_dfa.count(row)) {
+                accept_priority_dfa[row] = get_max_priority(curr);
+            }
+            dfa.push_back(dfa_row);
+            row++;
+        }
+    }
+
+    /**
+     * Description: convert vector of states to string separated by #.
+     * @param vec
+     * @return string ret
+     */
+    string conv_vec_to_str(vector<int> &vec) {
+        string ret = "#";
+        for (int x : vec) ret += (to_string(x) + "#");
+        return ret;
+    }
+
+    /**
+     * Description: get all target states from source with col. transition.
+     * @param vec
+     * @param col
+     * @return vector ret
+     */
+    vector<int> get_all_to(vector<int> &vec, int col) {
+        unordered_set<int> st;
+        for (int x : vec) {
+            for (int y : nfa[x][col]) {
+                st.emplace(y);
+            }
+        }
+        return vector<int>(st.begin(), st.end());
+    }
+
+    /**
+     * Description: add current state to accept_state_dfa if it acceptance state.
+     * @param vec
+     * @param curr
+     */
+    void add_if_accept(vector<int> &vec, int curr) {
+        int state = -1, priority = INT_MAX;
+        for (int x : vec) {
+            if (accept_state_nfa.count(x)) {
+                if (accept_priority[x] < priority) state = x, priority = accept_priority[x];
+            }
+        }
+        if (state != -1) accept_state_dfa[curr] = accept_state_nfa[state];
+    }
+
+    int get_max_priority(vector<int> &vec) {
+        int ret = INT_MAX;
+        for(int x : vec) {
+            if(this->accept_priority.count(x)) ret = min(ret, this->accept_priority[x]);
+        }
+        return ret;
+    }
+
+    /**
+     * Description: minimize dfa to dfa_mini.
+     */
+    void minimization() {
+        int n = this->dfa.size();
+        vector<vector<bool>> memo = set_init(n);
+        bool flag = false;
+        while (!flag) {
+            flag = true;
+            for (int i = 0; i < n; i++) {
+                for (int j = 0; j < i; j++) {
+                    if (!memo[i][j]) {
+                        if (!test(i, j, memo)) {
+                            memo[i][j] = true;
+                            flag = false;
+                        }
+                    }
+                }
+            }
+        }
+        unordered_map<int, int> old_new;
+        unordered_map<int, vector<int>> new_old;
+        int current = 0;
+        old_new[0] = current;
+        new_old[current].push_back(0);
+        for (int i = 0; i < n; i++) {
+            for (int j = 0; j < i; j++) {
+                if (!memo[i][j]) {
+                    old_new[i] = old_new[j];
+                    new_old[old_new[j]].push_back(i);
+                    break;
+                }
+            }
+            if (!old_new.count(i)) {
+                current++;
+                old_new[i] = current;
+                new_old[current].push_back(i);
+            }
+        }
+        for (int i = 0; i <= current; i++) {
+            vector<int> temp;
+            int old = new_old[i][0];
+            int n = dfa[old].size();
+            temp.push_back(-1);
+            for (int j = 1; j < n; j++) {
+                temp.push_back(old_new[dfa[old][j]]);
+            }
+            dfa_mini.push_back(temp);
+            if(accept_state_dfa.count(old)) {
+                accept_state_dfa_mini[i] = accept_state_dfa[old];
+                accept_priority_dfa_mini[i] = get_max_priority_dfa(new_old[i]);
+            }
+        }
+    }
+
+    /**
+     * Description: initialization of Myhill Nerode matrix.
+     * @param n
+     * @return Myhill Nerode matrix.
+     */
+    vector<vector<bool>> set_init(int n) {
+        // not equivalent => true, equivalent => false.
+        vector<vector<bool>> ret(n, vector<bool>(n, false));
+
+        for (int i = 0; i < n; i++) {
+            for (int j = 0; j < i; j++) {
+                ret[i][j] = test_final_not_final(i, j);
+            }
+        }
+
+        return ret;
+    }
+
+    /**
+     * Description: test two state are final or not-final.
+     * @param x
+     * @param y
+     * @return bool
+     */
+    bool test_final_not_final(int x, int y) {
+        if (!accept_state_dfa.count(x) && !accept_state_dfa.count(y)) return false;
+        else if (accept_state_dfa.count(x) && accept_state_dfa.count(y)) {
+            return !(accept_state_dfa[x] == accept_state_dfa[y]);
+        } else return true;
+    }
+
+    /**
+     * Description: test equevilant state from previous state of Myhill Nerode matrix.
+     * @param x
+     * @param y
+     * @param memo
+     * @return bool
+     */
+    bool test(int x, int y, vector<vector<bool>> &memo) {
+        int n = this->dfa[x].size();
+        for (int i = 1; i < n; i++) {
+            int xx = this->dfa[x][i];
+            int yy = this->dfa[y][i];
+            if (memo[max(xx, yy)][min(xx, yy)]) return false;
+        }
+        return true;
+    }
+
+    int get_max_priority_dfa(vector<int> &vec) {
+        int ret = INT_MAX;
+        for (int x : vec) {
+            if (this->accept_priority_dfa.count(x)) ret = min(ret, this->accept_priority_dfa[x]);
+        }
+        return ret;
+    }
+
+    vector <unordered_map<char, int>> convert_dfa() {
+        int n = dfa_mini.size();
+        vector<unordered_map < char, int>>
+        ret(n);
+        for (int i = 0; i < n; i++) {
+            unordered_map<char, int> mp;
+            for (int j = 1; j < 128; j++) {
+                mp[(char) j] = dfa_mini[i][j];
+            }
+            ret[i] = mp;
+        }
+        return ret;
+    }
+
+public:
+    /**
+     * 
+    DFA(vector<unordered_map<char, string>> &nfa, int start_state, unordered_map<int, string> &accepted,
+        unordered_map<int, int> &priority) {
+        this->nfa = convert_nfa(nfa);
+        this->nfa_start_state = start_state;
+        this->accept_state_nfa = accepted;
+        this->accept_priority = priority;
+        this->dfa_start_state = get_starting_state();
+
+        build_DFA(this->dfa_start_state);
+
+        for (int i = 0; i < dfa.size(); i++) {
+            cout << i << "=> ";
+            for (int j = 1; j < dfa[0].size(); j++) {
+                cout << dfa[i][j] << " ";
+            }
+            cout << endl;
+        }
+
+        minimization();
+
+        for (int i = 0; i < dfa_mini.size(); i++) {
+            cout << i << "=> ";
+            for (int j = 1; j < dfa_mini[0].size(); j++) {
+                cout << dfa_mini[i][j] << " ";
+            }
+            cout << endl;
+        }
+
+        this->final_dfa = convert_dfa();
+
+        cout << this->final_dfa.size();
+    }
+};
