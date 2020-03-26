@@ -3,10 +3,16 @@
 #include <utility>
 #include <string.h>
 #include <vector>
+
 using namespace std;
-
-vector<unordered_map<char, string>> all_states;
-
+class Nfa
+{
+private:
+ vector<unordered_map<char, string>> &all_states ;
+public:
+    Nfa(vector<unordered_map<char, string>> &vec) :all_states(vec)
+    {
+    }
 //2 Nfas are ored (|)
 std::pair<int, int> reg_nfa_op1(pair<int, int> nfa1, pair<int, int> nfa2)
 {
@@ -143,10 +149,10 @@ std::pair<int, int> reg_nfa_op5(char range1, char range2)
     unordered_map<char, string> temp;
 
     int r = (int(range2) - int(range1));
-    
+
     for (int i = 0; i <= r ; i++)
     {
-        
+
         temp.insert(pair<char, string>(range1, to_string(size1 + 1)));
         range1 += 1;
     }
@@ -156,18 +162,19 @@ std::pair<int, int> reg_nfa_op5(char range1, char range2)
 
     return std::make_pair(size1, all_states.size() - 1);
 }
-
+};
+/*
 int main()
 {
 
-    /*unordered_map<char, string> temp;
+    unordered_map<char, string> temp;
     temp.insert(pair<char, string>('a', "1"));
     all_states.push_back(temp);
     all_states.push_back(unordered_map<char, string>());
     temp.clear();
     temp.insert(pair<char, string>('b', "3"));
     all_states.push_back(temp);
-    all_states.push_back(unordered_map<char, string>());*/
+    all_states.push_back(unordered_map<char, string>());
 
     pair<int, int> t1(0, 1);
     pair<int, int> t2(2, 3);
@@ -179,3 +186,4 @@ int main()
 
     return 0;
 }
+*/
