@@ -16,6 +16,7 @@ string LexicalAnalyer::tokenize()
     vector<vector<bool>> prevFailed(dfa.size(), vector<bool>(input.size(), false));
    
     int bottom = -1;
+    int j = 0;
     while (true)
     {
         int q = q0;
@@ -33,6 +34,13 @@ string LexicalAnalyer::tokenize()
             q = dfa[q][input[i]];
             i++;
         }
+        int dead_index = -2;
+        if(q == 1){//dead state
+            dead_index = i;
+            q = st.top().first;
+            i = st.top().second;
+            st.pop();
+        }
         while(!finalStates.count(q)){
             prevFailed[q][i] = true;
             q = st.top().first;
@@ -41,7 +49,13 @@ string LexicalAnalyer::tokenize()
             if(q == bottom)
                 return "failure";
         }
-        cout<<i-1<<" "<<q<<endl;
+        if(q == q0 && dead_index != -2){
+            i = dead_index;
+            q = 1;
+        }
+        j++;
+        if(j > 6)break;
+        cout<<i-1<<" "<<q<<" "<<finalStates[q]<<endl;
         if(i >= input.size()){
             return "success";
         }

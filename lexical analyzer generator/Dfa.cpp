@@ -1,3 +1,5 @@
+#include<bits/stdc++.h>
+using namespace std;
 class DFA {
 private:
     // nfa
@@ -295,6 +297,7 @@ private:
         vector<unordered_map < char, int>>
         ret(n);
         for (int i = 0; i < n; i++) {
+            if(i == 1)continue;
             unordered_map<char, int> mp;
             for (int j = 1; j < 128; j++) {
                 mp[(char) j] = dfa_mini[i][j];
@@ -320,30 +323,29 @@ public:
 
         build_DFA(this->dfa_start_state);
 
-        for (int i = 0; i < dfa.size(); i++) {
-            cout << i << "=> ";
-            for (int j = 1; j < dfa[0].size(); j++) {
-                cout << dfa[i][j] << " ";
-            }
-            cout << endl;
-        }
+        // for (int i = 0; i < dfa.size(); i++) {
+        //     cout << i << "=> ";
+        //     for (int j = 1; j < dfa[0].size(); j++) {
+        //         cout << dfa[i][j] << " ";
+        //     }
+        //     cout << endl;
+        // }
 
         minimization();
 
-        for (int i = 0; i < dfa_mini.size(); i++) {
-            cout << i << "=> ";
-            for (int j = 1; j < dfa_mini[0].size(); j++) {
-                cout << dfa_mini[i][j] << " ";
-            }
-            cout << endl;
-        }
+        // for (int i = 0; i < dfa_mini.size(); i++) {
+        //     cout << i << "=> ";
+        //     for (int j = 1; j < dfa_mini[0].size(); j++) {
+        //         cout << dfa_mini[i][j] << " ";
+        //     }
+        //     cout << endl;
+        // }
 
         this->final_dfa = convert_dfa();
-
-        cout << this->final_dfa.size();
+    
+    this->accept_state_dfa_mini[1] = "(Error)";
+        // cout << this->final_dfa.size();
     }
-
-    vector<unordered_map<char, int>> get_dfa() return this->final_dfa;
-    unordered_map<int, string> get_accept_states() return accept_state_dfa_mini;
-
+    vector<unordered_map<char, int>> get_dfa() {return this->final_dfa;}
+    unordered_map<int, string> get_accept_states() {return accept_state_dfa_mini;}
 };
