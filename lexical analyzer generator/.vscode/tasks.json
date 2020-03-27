@@ -8,8 +8,9 @@
             "args": [
                 "-g",
                 "main.cpp",
-                "LexicalAnalyzer.cpp",
-                "Dfa.cpp"
+                "LexicalGeneratorBuilder.cpp"
+                
+                
             ],
             "group": "build"
         },
