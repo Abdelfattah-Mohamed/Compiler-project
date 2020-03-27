@@ -30,7 +30,7 @@ std::pair<int, int> reg_nfa_op1(pair<int, int> nfa1, pair<int, int> nfa2)
     if (state1.count(' ') > 0)
     {
         string s1 = state1[' '] + "," + to_string(all_states.size());
-        state1.insert(pair<char, string>(' ', s1));
+        state1[' ']= s1;
     }
     else
     {
@@ -39,7 +39,7 @@ std::pair<int, int> reg_nfa_op1(pair<int, int> nfa1, pair<int, int> nfa2)
     if (state2.count(' ') > 0)
     {
         string s2 = state2[' '] + "," + to_string(all_states.size());
-        state2.insert(pair<char, string>(' ', s2));
+        state2[' ']= s2;
     }
     else
     {
@@ -63,7 +63,7 @@ std::pair<int, int> reg_nfa_op2(pair<int, int> nfa1, pair<int, int> nfa2)
     if (state1.count(' ') > 0)
     {
         string s1 = state1[' '] + "," + to_string(nfa2.first);
-        state1.insert(pair<char, string>(' ', s1));
+        state1[' '] =s1;
     }
     else
     {
@@ -73,7 +73,7 @@ std::pair<int, int> reg_nfa_op2(pair<int, int> nfa1, pair<int, int> nfa2)
     if (state2.count(' ') > 0)
     {
         string s2 = state2[' '] + "," + to_string(all_states.size());
-        state2.insert(pair<char, string>(' ', s2));
+        state2[' ']= s2;
     }
     else
     {
@@ -100,7 +100,7 @@ std::pair<int, int> reg_nfa_op3(pair<int, int> nfa1)
     if (state1.count(' ') > 0)
     {
         string s2 = state1[' '] + "," + to_string(all_states.size()) + "," + to_string(nfa1.first);
-        state1.insert(pair<char, string>(' ', s2));
+        state1[' ']= s2;
     }
     else
     {
@@ -127,7 +127,7 @@ std::pair<int, int> reg_nfa_op4(pair<int, int> nfa1)
     if (state1.count(' ') > 0)
     {
         string s = state1[' '] + "," + to_string(all_states.size()) + "," + to_string(nfa1.first);
-        state1.insert(pair<char, string>(' ', s));
+        state1[' ']= s;
     }
     else
     {

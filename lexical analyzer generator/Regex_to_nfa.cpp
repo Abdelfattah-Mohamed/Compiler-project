@@ -21,7 +21,7 @@ private :
 vector<unordered_map<char, string>> all_states;
 unordered_map<string, pair<int, int>> NFAs;
 vector<string> rule_sep;
-vector <string> priority;
+unordered_map<string, pair<int, int>> priority;
 Nfa *obj;
 public:
     regex_to_nfa(string file_name){
@@ -64,7 +64,7 @@ public:
 unordered_map<char, string> state0 ;
         state0[' ']="0";
         all_states.push_back(state0);
-
+int priority_num =1;
 
      ///the main loop that loops on each rule
      ///and perform the main algorithm on all lines
@@ -114,9 +114,13 @@ unordered_map<char, string> state0 ;
         if(rule_sep[0] =="[" || rule_sep[0] =="{"){// keywords and symbols
             for(int cnt=1;cnt<rule_sep.size()-1;cnt++){
                     pair<int,int> result = create_NFA(rule_sep[cnt]);
+                    pair<int,int> pir ;
                     ///adjust priority
                     removeCharsFromString(rule_sep[cnt],"\\");
                     NFAs[rule_sep[cnt]]=result;
+                    pir.first = 0;
+                    pir.second = result.second;
+                    priority[rule_sep[cnt]] =pir;
                     /*cout << "hereeee" << result.first <<endl;*/
                     unordered_map<char, string> &state0 = all_states[0];
                     string s = state0[' '] + ","+to_string(result.first);
@@ -124,6 +128,7 @@ unordered_map<char, string> state0 ;
             }
         }else{// expressions and definitions
         pair<int,int> result ;
+        pair<int,int> pir ;
         ///are these necessary ?
         ///extract the id
         ///add start state = the vector size
@@ -134,6 +139,10 @@ unordered_map<char, string> state0 ;
         unordered_map<char, string> &state0 = all_states[0];
         state0[' '] += ","+to_string(result.first);
         NFAs[rule_sep[0]]=result;
+                    pir.first = priority_num;
+                    priority_num++;
+                    pir.second = result.second;
+                    priority[rule_sep[0]] =pir;
         ///make the first state above goes ro the first state of the result and the end state is the same
 
 
@@ -143,11 +152,29 @@ unordered_map<char, string> state0 ;
 
      }
 
-unordered_map<string, pair <int,int>>:: iterator itr;
+        unordered_map<string, pair <int,int>>:: iterator itr;
      for (itr = NFAs.begin(); itr != NFAs.end(); itr++)
     {
         pair <int,int> pr = itr->second;
         cout << itr->first << "  " << pr.first << " " <<pr.second << endl;
+
+     }
+
+    /* for(int i = 0 ; i < all_states.size(); i++){
+        unordered_map<char,string> curr = all_states[i];
+        cout << "state" <<i <<endl;
+            unordered_map<char,string>:: iterator itr2;
+            for (itr2 = curr.begin(); itr2 != curr.end(); itr2++){
+                cout << itr2->first << " ---->> " << itr2->second <<endl;
+            }
+     }*/
+cout<<"________________________________________________________"<<endl;
+     unordered_map<string, pair <int,int>>:: iterator itr3;
+     for (itr3 = priority.begin(); itr3 != priority.end(); itr3++)
+    {
+        pair <int,int> pr = itr3->second;
+        cout << itr3->first << "  " << pr.first << " " <<pr.second << endl;
+
      }
 
     }
