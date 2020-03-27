@@ -8,8 +8,7 @@
 
 using namespace std;
 
-class regex_to_nfa
-{
+class regex_to_nfa {
 private:
     vector<unordered_map<char, string>> all_states;
     unordered_map<string, pair<int, int>> NFAs;
@@ -18,28 +17,26 @@ private:
     Nfa *obj;
 
 public:
-    regex_to_nfa(string file_name)
-    {
+    regex_to_nfa(string file_name) {
         obj = new Nfa(all_states);
         parse_rules(file_name);
     }
-    vector<unordered_map<char, string>> get_nfa()
-    {
+
+    vector<unordered_map<char, string>> get_nfa() {
         return all_states;
     }
-    unordered_map<string, pair<int, int>> get_priority_map()
-    {
+
+    unordered_map<string, pair<int, int>> get_priority_map() {
         return priority;
     }
-    void parse_rules(string file_name)
-    {
+
+    void parse_rules(string file_name) {
         // storing the rules line by line
         //___________________________________
         ifstream ip_file(file_name);
         string rules;
         string line;
-        while (getline(ip_file, line))
-        {
+        while (getline(ip_file, line)) {
             rules += line;
             rules += "||";
         }
@@ -48,22 +45,20 @@ public:
         vector<string> lines;
         size_t pos = 0;
         std::string token;
-        while ((pos = rules.find("||")) != std::string::npos)
-        {
+        while ((pos = rules.find("||")) != std::string::npos) {
             token = rules.substr(0, pos);
-            if (token == "\\L")
-            {
+            if (token == "\\L") {
                 token = ' ';
             }
             lines.push_back(token);
             rules.erase(0, pos + 2);
         }
-        /*
-     for(int counter1 =0 ;counter1<lines.size();counter1++){
-            cout<<lines[counter1]<<endl;
 
-     }
-*/
+        for (int counter1 = 0; counter1 < lines.size(); counter1++) {
+            cout << lines[counter1] << endl;
+
+        }
+
 
         unordered_map<char, string> state0;
         state0[' '] = "0";
@@ -72,35 +67,27 @@ public:
 
         ///the main loop that loops on each rule
         ///and perform the main algorithm on all lines
-        for (int i = 0; i < lines.size(); i++)
-        {
+        for (int i = 0; i < lines.size(); i++) {
 
             ///for each line
-            for (int count = 0; count < lines[i].size(); count++)
-            {
+            for (int count = 0; count < lines[i].size(); count++) {
                 string token;
 
                 char c = lines[i].at(count);
-                if (isalpha(c))
-                {
-                    while (count < lines[i].size() && isalnum(c))
-                    {
+                if (isalpha(c)) {
+                    while (count < lines[i].size() && isalnum(c)) {
                         token += c;
                         count++;
-                        if (count < lines[i].size())
-                        {
+                        if (count < lines[i].size()) {
                             c = lines[i].at(count);
                         }
                     }
                     rule_sep.push_back(token);
                     count--;
-                }
-                else if (!isspace(c))
-                {
+                } else if (!isspace(c)) {
                     token += c;
 
-                    if (c == '\\')
-                    {
+                    if (c == '\\') {
                         count++;
                         c = lines[i].at(count);
                         token += c;
@@ -114,14 +101,13 @@ public:
         }
 */
 
-            if (rule_sep[0] == "[" || rule_sep[0] == "{")
-            { // keywords and symbols
-                for (int cnt = 1; cnt < rule_sep.size() - 1; cnt++)
-                {
+            if (rule_sep[0] == "[" || rule_sep[0] == "{") { // keywords and symbols
+                for (int cnt = 1; cnt < rule_sep.size() - 1; cnt++) {
+                    removeCharsFromString(rule_sep[cnt], "\\");
                     pair<int, int> result = create_NFA(rule_sep[cnt]);
                     pair<int, int> pir;
                     ///adjust priority
-                    removeCharsFromString(rule_sep[cnt], "\\");
+
                     NFAs[rule_sep[cnt]] = result;
                     pir.first = 0;
                     pir.second = result.second;
@@ -131,9 +117,7 @@ public:
                     string s = state0[' '] + "," + to_string(result.first);
                     state0[' '] = s;
                 }
-            }
-            else
-            { // expressions and definitions
+            } else { // expressions and definitions
                 pair<int, int> result;
                 pair<int, int> pir;
                 ///are these necessary ?
@@ -146,10 +130,13 @@ public:
                 unordered_map<char, string> &state0 = all_states[0];
                 state0[' '] += "," + to_string(result.first);
                 NFAs[rule_sep[0]] = result;
-                pir.first = priority_num;
-                priority_num++;
-                pir.second = result.second;
-                priority[rule_sep[0]] = pir;
+                if (rule_sep[1] == ":") {
+                    pir.first = priority_num;
+                    priority_num++;
+                    pir.second = result.second;
+                    priority[rule_sep[0]] = pir;
+                }
+
                 ///make the first state above goes ro the first state of the result and the end state is the same
             }
             /*cout << state0[' '] << endl;*/
@@ -157,8 +144,7 @@ public:
         }
 
         unordered_map<string, pair<int, int>>::iterator itr;
-        for (itr = NFAs.begin(); itr != NFAs.end(); itr++)
-        {
+        for (itr = NFAs.begin(); itr != NFAs.end(); itr++) {
             pair<int, int> pr = itr->second;
             // cout << itr->first << "  " << pr.first << " " << pr.second << endl;
         }
@@ -173,21 +159,18 @@ public:
      }*/
         // cout << "________________________________________________________" << endl;
         unordered_map<string, pair<int, int>>::iterator itr3;
-        for (itr3 = priority.begin(); itr3 != priority.end(); itr3++)
-        {
+        for (itr3 = priority.begin(); itr3 != priority.end(); itr3++) {
             pair<int, int> pr = itr3->second;
             // cout << itr3->first << "  " << pr.first << " " << pr.second << endl;
         }
     }
 
-    pair<int, int> create_NFA(string s)
-    {
+    pair<int, int> create_NFA(string s) {
         pair<int, int> result;
         result.first = all_states.size();
 
         int counter = 0;
-        for (counter; counter < s.size(); counter++)
-        {
+        for (counter; counter < s.size(); counter++) {
             char curr = s.at(counter);
             unordered_map<char, string> state;
             state[curr] = to_string(all_states.size() + 1);
@@ -199,146 +182,88 @@ public:
         all_states.push_back(f_state);
         return result;
     }
-    pair<int, int> process_exp(vector<string> exp, bool f)
-    {
+
+    pair<int, int> process_exp(vector<string> exp, bool f) {
         pair<int, int> first;
         pair<int, int> result;
         pair<int, int> old_result;
         bool flag = false;
         int ors = 0;
-        for (int counter1 = 2; counter1 < exp.size(); counter1++)
-        {
+        for (int counter1 = 2; counter1 < exp.size(); counter1++) {
             string token = exp[counter1];
 
             ///case of 2 successive tokens (conc)
-            if (token != "+" && token != "-" && token != "*" && token != "|")
-            { //operand
-                if (token == "(")
-                {
+            if (token != "+" && token != "-" && token != "*" && token != "|") { //operand
+                if (token == "(") {
                     vector<string> temp;
                     temp.push_back("empt1");
                     temp.push_back("empt2");
                     int cnt = 0;
                     counter1++;
-                    while (exp[counter1] != ")" || cnt != 0)
-                    {
-                        if (exp[counter1] == "(")
-                        {
+                    while (exp[counter1] != ")" || cnt != 0) {
+                        if (exp[counter1] == "(") {
                             cnt++;
                         }
-                        if (exp[counter1] == ")")
-                        {
+                        if (exp[counter1] == ")") {
                             cnt--;
                         }
                         temp.push_back(exp[counter1]);
                         counter1++;
                     }
                     first = process_exp(temp, true);
-                }
-                else
-                {
+                } else {
                     /// case of range is detected first bec it's different
-                    if (counter1 + 1 < exp.size() && exp[counter1 + 1] == "-")
-                    {
+                    if (counter1 + 1 < exp.size() && exp[counter1 + 1] == "-") {
                         char a = token.at(0);
                         char b = exp[counter1 + 2].at(0);
                         first = obj->reg_nfa_op5(a, b);
                         counter1 += 2;
-                    }
-                    else if (NFAs.find(token) != NFAs.end())
-                    {
+                    } else if (NFAs.find(token) != NFAs.end()) {
                         first = NFAs[token];
-                    }
-                    else
-                    { // not there
+                    } else { // not there
                         removeCharsFromString(token, "\\");
                         first = create_NFA(token);
                     }
                 }
 
-                if (counter1 + 1 < exp.size() && exp[counter1 + 1] == "*")
-                {
+                if (counter1 + 1 < exp.size() && exp[counter1 + 1] == "*") {
                     first = obj->reg_nfa_op3(first);
-                }
-                else if (counter1 + 1 < exp.size() && exp[counter1 + 1] == "+")
-                {
+                } else if (counter1 + 1 < exp.size() && exp[counter1 + 1] == "+") {
                     first = obj->reg_nfa_op4(first);
                 }
 
-                if (f || flag)
-                { //first token
+                if (f || flag) { //first token
                     result = first;
-                }
-                else
-                {
-                    if (flag)
-                    {
+                } else {
+                    if (flag) {
                         result = obj->reg_nfa_op1(result, first);
-                    }
-                    else
-                    {
+                    } else {
                         result = obj->reg_nfa_op2(result, first);
                     }
                 }
             }
-            if (token == "|")
-            {
+            if (token == "|") {
                 flag = true;
-                if (ors == 0)
-                {
+                if (ors == 0) {
                     old_result = result;
-                }
-                else
-                {
+                } else {
                     old_result = obj->reg_nfa_op1(result, old_result);
                 }
                 ors++;
-            }
-            else
-            {
+            } else {
                 flag = false;
             }
             f = false;
         }
-        if (ors > 0)
-        {
+        if (ors > 0) {
             result = obj->reg_nfa_op1(result, old_result);
         }
         return result;
     }
 
-    void removeCharsFromString(string &str, char *charsToRemove)
-    {
-        for (unsigned int i = 0; i < strlen(charsToRemove); ++i)
-        {
+    void removeCharsFromString(string &str, char *charsToRemove) {
+        for (unsigned int i = 0; i < strlen(charsToRemove); ++i) {
             str.erase(remove(str.begin(), str.end(), charsToRemove[i]), str.end());
         }
     }
 };
-
-/**
- * we still need to adjust the algorithm so it doesn't execute from a main
- * so that we can use it in the upcoming phase , also the file name should
- * be taken as a param
- */
-// int main()
-// {
-
-//     regex_to_nfa("lex_rules_ip.txt");
-
-//     /*
-//      unordered_map<char, string> &s_zer0 = all_states[0];
-//      cout << s_zer0[' '] << endl;
-//      cout << state0[' '] << endl;
-//      s_zer0 = state0;
-//      cout << s_zer0[' '] << endl;
-//      */
-
-//     /*
-//     for(int counter =0 ; counter < all_states.size();counter++){
-//         unordered_map<char, string> s_zer0 = all_states[counter];
-//         cout << s_zer0[' '] << endl;
-//     }*/
-//     return 0;
-// }
-// creates an nda for the key words or symbol or any undefined char

@@ -55,6 +55,7 @@ private:
             else
                 temp += c;
         }
+        if (!temp.empty()) result.push_back(temp);
         vector<int> ret;
         for (string x : result)
             ret.push_back(stoi(x));
