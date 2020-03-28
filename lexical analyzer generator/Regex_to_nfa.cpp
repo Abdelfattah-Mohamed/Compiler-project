@@ -14,7 +14,7 @@ private:
     unordered_map<string, vector<string>> NFAs;
     vector<string> rule_sep;
     unordered_map<string, pair<int, int>> priority;
-    unordered_map<string , string> sub;
+    unordered_map<string, string> sub;
     Nfa *obj;
 
 public:
@@ -48,9 +48,7 @@ public:
         std::string token;
         while ((pos = rules.find("||")) != std::string::npos) {
             token = rules.substr(0, pos);
-            if (token == "\\L") {
-                token = ' ';
-            }
+
             lines.push_back(token);
             rules.erase(0, pos + 2);
         }
@@ -91,6 +89,9 @@ public:
                         count++;
                         c = lines[i].at(count);
                         token += c;
+                        if (c == 'L') {
+                            token = " ";
+                        }
                     }
                     rule_sep.push_back(token);
                 }
@@ -138,8 +139,8 @@ public:
                     pir.first = priority_num;
                     priority_num++;
                     pir.second = result.second;
-                priority[rule_sep[0]] = pir;
-                }else{
+                    priority[rule_sep[0]] = pir;
+                } else {
                     NFAs[rule_sep[0]] = rule_sep;
                 }
 
@@ -152,8 +153,8 @@ public:
         unordered_map<string, vector<string>>::iterator itr;
         for (itr = NFAs.begin(); itr != NFAs.end(); itr++) {
             vector<string> pr = itr->second;
-            for(int counter =0 ; counter <pr.size();counter++){
-                cout << pr[counter] <<" ";
+            for (int counter = 0; counter < pr.size(); counter++) {
+                cout << pr[counter] << " ";
             }
             cout << endl;
         }
@@ -170,7 +171,7 @@ public:
         unordered_map<string, pair<int, int>>::iterator itr3;
         for (itr3 = priority.begin(); itr3 != priority.end(); itr3++) {
             pair<int, int> pr = itr3->second;
-             cout << itr3->first << "  " << pr.first << " " << pr.second << endl;
+            cout << itr3->first << "  " << pr.first << " " << pr.second << endl;
         }
     }
 
@@ -228,7 +229,7 @@ public:
                         first = obj->reg_nfa_op5(a, b);
                         counter1 += 2;
                     } else if (NFAs.find(token) != NFAs.end()) {
-                        first = process_exp(NFAs[token],true);
+                        first = process_exp(NFAs[token], true);
                     } else { // not there
                         removeCharsFromString(token, "\\");
                         first = create_NFA(token);
@@ -276,8 +277,4 @@ public:
         }
     }
 };
-int main(){
-regex_to_nfa("lex_rules_ip.txt");
-return 0;
 
-}
