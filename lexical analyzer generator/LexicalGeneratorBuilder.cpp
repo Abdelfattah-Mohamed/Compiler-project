@@ -28,7 +28,7 @@ public:
 
     void buildGenerator() {
         regex_to_nfa *regToNfa = new regex_to_nfa(rulesPath);
-
+        cout << endl << regToNfa->get_priority_map().size() << endl;
         DFA *dfa = new DFA(regToNfa->get_nfa(), 0, regToNfa->get_priority_map());
 
         unordered_map<int, string> acc = dfa->get_accept_states();

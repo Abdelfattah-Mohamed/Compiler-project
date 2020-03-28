@@ -14,6 +14,7 @@ private:
     unordered_map<string, pair<int, int>> NFAs;
     vector<string> rule_sep;
     unordered_map<string, pair<int, int>> priority;
+    unordered_map<string , string> sub;
     Nfa *obj;
 
 public:
@@ -56,7 +57,6 @@ public:
 
         for (int counter1 = 0; counter1 < lines.size(); counter1++) {
             cout << lines[counter1] << endl;
-
         }
 
 
@@ -95,8 +95,9 @@ public:
                     rule_sep.push_back(token);
                 }
             }
-            /*
+/*
         for(int cnt=0;cnt<rule_sep.size();cnt++){
+
             cout <<cnt<<rule_sep[cnt]<<endl;
         }
 */
@@ -127,16 +128,17 @@ public:
                 ///int first = num of the added start state
                 result = process_exp(rule_sep, true);
                 /*cout << result.first << " " << result.second <<endl;*/
-                unordered_map<char, string> &state0 = all_states[0];
-                state0[' '] += "," + to_string(result.first);
+
                 NFAs[rule_sep[0]] = result;
+                pir.first = -1;
                 if (rule_sep[1] == ":") {
+                    unordered_map<char, string> &state0 = all_states[0];
+                    state0[' '] += "," + to_string(result.first);
                     pir.first = priority_num;
                     priority_num++;
-                    pir.second = result.second;
-                    priority[rule_sep[0]] = pir;
                 }
-
+                pir.second = result.second;
+                priority[rule_sep[0]] = pir;
                 ///make the first state above goes ro the first state of the result and the end state is the same
             }
             /*cout << state0[' '] << endl;*/

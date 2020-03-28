@@ -107,6 +107,11 @@ private:
             }
         }
         sort(eps.begin(), eps.end());
+        for(int x : eps) {
+            if(x == 56 || x == 14) {
+                cout << -1;
+            }
+        }
         return eps;
     }
 
@@ -199,7 +204,7 @@ private:
         {
             if (accept_state_nfa.count(x))
             {
-                if (accept_priority[x] < priority)
+                if (accept_priority[x] < priority && accept_priority[x] != -1)
                     state = x, priority = accept_priority[x];
             }
         }
@@ -213,7 +218,7 @@ private:
         for (int x : vec)
         {
             if (this->accept_priority.count(x))
-                ret = min(ret, this->accept_priority[x]);
+                if(this->accept_priority[x] != -1) ret = min(ret, this->accept_priority[x]);
         }
         return ret;
     }
@@ -351,7 +356,7 @@ private:
         for (int x : vec)
         {
             if (this->accept_priority_dfa.count(x))
-                ret = min(ret, this->accept_priority_dfa[x]);
+                if(this->accept_priority_dfa[x] != -1) ret = min(ret, this->accept_priority_dfa[x]);
         }
         return ret;
     }
