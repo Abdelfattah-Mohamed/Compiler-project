@@ -11,7 +11,7 @@ using namespace std;
 class regex_to_nfa {
 private:
     vector<unordered_map<char, string>> all_states;
-    unordered_map<string, pair<int, int>> NFAs;
+    unordered_map<string, vector<string>> NFAs;
     vector<string> rule_sep;
     unordered_map<string, pair<int, int>> priority;
     unordered_map<string , string> sub;
@@ -54,11 +54,11 @@ public:
             lines.push_back(token);
             rules.erase(0, pos + 2);
         }
-
+/*
         for (int counter1 = 0; counter1 < lines.size(); counter1++) {
             cout << lines[counter1] << endl;
         }
-
+*/
 
         unordered_map<char, string> state0;
         state0[' '] = "0";
@@ -109,7 +109,7 @@ public:
                     pair<int, int> pir;
                     ///adjust priority
 
-                    NFAs[rule_sep[cnt]] = result;
+                    ///NFAs[rule_sep[cnt]] = result;
                     pir.first = 0;
                     pir.second = result.second;
                     priority[rule_sep[cnt]] = pir;
@@ -126,29 +126,36 @@ public:
                 ///add start state = the vector size
                 ///make the zero state goes to this state
                 ///int first = num of the added start state
-                result = process_exp(rule_sep, true);
+
                 /*cout << result.first << " " << result.second <<endl;*/
 
-                NFAs[rule_sep[0]] = result;
-                pir.first = -1;
+
+                ///pir.first = -1;
                 if (rule_sep[1] == ":") {
+                    result = process_exp(rule_sep, true);
                     unordered_map<char, string> &state0 = all_states[0];
                     state0[' '] += "," + to_string(result.first);
                     pir.first = priority_num;
                     priority_num++;
-                }
-                pir.second = result.second;
+                    pir.second = result.second;
                 priority[rule_sep[0]] = pir;
+                }else{
+                    NFAs[rule_sep[0]] = rule_sep;
+                }
+
                 ///make the first state above goes ro the first state of the result and the end state is the same
             }
             /*cout << state0[' '] << endl;*/
             rule_sep.clear();
         }
 
-        unordered_map<string, pair<int, int>>::iterator itr;
+        unordered_map<string, vector<string>>::iterator itr;
         for (itr = NFAs.begin(); itr != NFAs.end(); itr++) {
-            pair<int, int> pr = itr->second;
-            // cout << itr->first << "  " << pr.first << " " << pr.second << endl;
+            vector<string> pr = itr->second;
+            for(int counter =0 ; counter <pr.size();counter++){
+                cout << pr[counter] <<" ";
+            }
+            cout << endl;
         }
 
         /* for(int i = 0 ; i < all_states.size(); i++){
@@ -163,7 +170,7 @@ public:
         unordered_map<string, pair<int, int>>::iterator itr3;
         for (itr3 = priority.begin(); itr3 != priority.end(); itr3++) {
             pair<int, int> pr = itr3->second;
-            // cout << itr3->first << "  " << pr.first << " " << pr.second << endl;
+             cout << itr3->first << "  " << pr.first << " " << pr.second << endl;
         }
     }
 
@@ -221,7 +228,7 @@ public:
                         first = obj->reg_nfa_op5(a, b);
                         counter1 += 2;
                     } else if (NFAs.find(token) != NFAs.end()) {
-                        first = NFAs[token];
+                        first = process_exp(NFAs[token],true);
                     } else { // not there
                         removeCharsFromString(token, "\\");
                         first = create_NFA(token);
@@ -269,3 +276,8 @@ public:
         }
     }
 };
+int main(){
+regex_to_nfa("lex_rules_ip.txt");
+return 0;
+
+}
