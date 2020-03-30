@@ -10,9 +10,6 @@ public:
     LexicalAnalyer(vector<unordered_map<char, int> > _dfa, int _q0, unordered_map<int, string>, string _input);
 
     string tokenize(string ip);
-
-    virtual ~LexicalAnalyer();
-
     void tock_all(string input);
 
 protected:

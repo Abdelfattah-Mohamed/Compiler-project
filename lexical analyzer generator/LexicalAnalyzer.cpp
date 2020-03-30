@@ -1,9 +1,6 @@
 #include "lexicalAnalyzer.h"
 
 
-LexicalAnalyer::~LexicalAnalyer() {
-}
-
 string LexicalAnalyer::tokenize(string ip) {
     int i = 0;
     vector<vector<bool>> prevFailed(dfa.size(), vector<bool>(ip.size(), false));
