@@ -40,7 +40,7 @@ string LexicalAnalyer::tokenize(string ip) {
             i = dead_index;
             q = 1;
         }
-        cout << i - 1 << " " << q << " " << finalStates[q] << endl;
+        cout<< finalStates[q] << endl;
         if (i >= ip.size()) {
             return "success";
         }
@@ -56,6 +56,7 @@ LexicalAnalyer::LexicalAnalyer(vector<unordered_map<char, int>> _dfa, int _q0, u
 }
 
 void LexicalAnalyer::tock_all(string input) {
+    freopen("output.txt","w",stdout);
     string ret = "";
     for (char c : input) {
         if (c != ' ') ret += c;
@@ -65,4 +66,5 @@ void LexicalAnalyer::tock_all(string input) {
         }
     }
     if(!ret.empty()) tokenize(ret);
+
 }
