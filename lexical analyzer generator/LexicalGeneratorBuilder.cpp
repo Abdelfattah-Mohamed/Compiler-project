@@ -18,7 +18,7 @@ public:
         ifstream myfile(inputPath);
         if (myfile) {
             while (getline(myfile, line)) {
-                input += line;
+                input += (line + " ");
             }
             myfile.close();
         }
