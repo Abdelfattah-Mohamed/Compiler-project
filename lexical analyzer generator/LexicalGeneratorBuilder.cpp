@@ -22,20 +22,22 @@ public:
             }
             myfile.close();
         }
-        cout << endl << input << endl;
+        // cout << endl << input << endl;
         return input;
     }
 
     void buildGenerator() {
         regex_to_nfa *regToNfa = new regex_to_nfa(rulesPath);
-        cout << endl << regToNfa->get_priority_map().size() << endl;
+        // cout << endl << regToNfa->get_priority_map().size() << endl;
         DFA *dfa = new DFA(regToNfa->get_nfa(), 0, regToNfa->get_priority_map());
 
         unordered_map<int, string> acc = dfa->get_accept_states();
-        cout << endl << dfa->get_accept_states().size() << " " << dfa->get_dfa().size() << endl;
+
+        // cout << endl << dfa->get_accept_states().size() << " " << dfa->get_dfa().size() << endl;
         vector<unordered_map<char, int>> dfa_vec = dfa->get_dfa();
         string input = readInput();
         LexicalAnalyer *lex = new LexicalAnalyer(dfa_vec, 0, acc, input);
+       
         lex->tock_all(input);
     }
 

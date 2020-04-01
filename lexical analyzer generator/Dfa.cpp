@@ -339,7 +339,7 @@ private:
     }
 
     void printing_dfa() {
-        freopen("dfa.txt", "w", stdout);
+        FILE  * file= freopen("dfa.txt", "w", stdout);
         int n = this->dfa_mini.size();
         cout << " Dfa ";
         for (int i = 1; i < 128; i++) {
@@ -356,16 +356,15 @@ private:
             }
             cout << endl;
         }
-        fclose (stdout);
     }
 
     void printing_acceptance() {
-        freopen("accept.txt", "w", stdout);
+        FILE * file = freopen("accept.txt", "w", stdout);
         vector<pair<int, string>> vec;
         for(auto x : this->accept_state_dfa_mini) vec.push_back({x.first, x.second});
         sort(vec.begin(), vec.end());
         for(auto x : vec) cout << x.first << " => " << x.second << endl;
-        fclose (stdout);
+      
     }
 
 public:
