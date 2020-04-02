@@ -36,7 +36,7 @@ public:
         // cout << endl << dfa->get_accept_states().size() << " " << dfa->get_dfa().size() << endl;
         vector<unordered_map<char, int>> dfa_vec = dfa->get_dfa();
         string input = readInput();
-        LexicalAnalyer *lex = new LexicalAnalyer(dfa_vec, 0, acc, input);
+        LexicalAnalyzer *lex = new LexicalAnalyzer(dfa_vec, 0, acc, input);
        
         lex->tock_all(input);
     }

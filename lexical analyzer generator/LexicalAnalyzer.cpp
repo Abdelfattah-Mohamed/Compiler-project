@@ -1,7 +1,7 @@
 #include "lexicalAnalyzer.h"
 
 
-string LexicalAnalyer::tokenize(string ip) {
+string LexicalAnalyzer::tokenize(string ip) {
     int i = 0;
     vector<vector<bool>> prevFailed(dfa.size(), vector<bool>(ip.size(), false));
     finalStates[0] = "error";
@@ -47,7 +47,7 @@ string LexicalAnalyer::tokenize(string ip) {
     }
 }
 
-LexicalAnalyer::LexicalAnalyer(vector<unordered_map<char, int>> _dfa, int _q0, unordered_map<int, string> _finalStates,
+LexicalAnalyzer::LexicalAnalyzer(vector<unordered_map<char, int>> _dfa, int _q0, unordered_map<int, string> _finalStates,
                                string _input) {
     dfa = _dfa;
     input = _input;
@@ -55,13 +55,14 @@ LexicalAnalyer::LexicalAnalyer(vector<unordered_map<char, int>> _dfa, int _q0, u
     q0 = _q0;
 }
 
-void LexicalAnalyer::tock_all(string input) {
+void LexicalAnalyzer::tock_all(string input) {
     freopen("output.txt","w",stdout);
     string ret = "";
     for (char c : input) {
         if (c != ' ') ret += c;
         else {
-            tokenize(ret);
+            if(!ret.empty())
+                tokenize(ret);
             ret = "";
         }
     }

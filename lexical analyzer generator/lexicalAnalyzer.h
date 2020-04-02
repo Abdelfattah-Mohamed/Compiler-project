@@ -5,9 +5,9 @@
 
 using namespace std;
 
-class LexicalAnalyer {
+class LexicalAnalyzer {
 public:
-    LexicalAnalyer(vector<unordered_map<char, int> > _dfa, int _q0, unordered_map<int, string>, string _input);
+    LexicalAnalyzer(vector<unordered_map<char, int> > _dfa, int _q0, unordered_map<int, string>, string _input);
 
     string tokenize(string ip);
     void tock_all(string input);
