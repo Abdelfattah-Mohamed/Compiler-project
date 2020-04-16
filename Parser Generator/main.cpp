@@ -1,5 +1,5 @@
 #include <bits/stdc++.h>
-#include "cfg.h"
+#include "cfg.cpp"
 using namespace std;
 
 int main()

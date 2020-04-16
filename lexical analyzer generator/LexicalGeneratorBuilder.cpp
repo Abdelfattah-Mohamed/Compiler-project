@@ -1,7 +1,7 @@
 #include <bits/stdc++.h>
 #include "Regex_to_nfa.cpp"
 #include "Dfa.cpp"
-#include "lexicalAnalyzer.h"
+#include "lexicalAnalyzer.cpp"
 
 using namespace std;
 
