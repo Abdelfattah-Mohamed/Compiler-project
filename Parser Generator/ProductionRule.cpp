@@ -10,16 +10,16 @@ public:
     ProductionRule(string _rhs, vector<string> _lhs)
     {
     }
-    string getRhs()
+    string getLhs()
     {
     }
-    vector<string> getLhs()
+    vector<string> getRhs()
     {
     }
-    void setLhs(string _rhs)
+    void setLhs(string _lhs)
     {
     }
-    void setRhs(vector<string> _lhs)
+    void setRhs(vector<string> _rhs)
     {
     }
 
