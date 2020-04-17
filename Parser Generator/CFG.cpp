@@ -15,7 +15,7 @@ private:
     unordered_map<string, unordered_set<string>> FollowSets;
     unordered_map<string, unordered_map<string, ProductionRule>> ll1Table;
     // non terminal , <ternminal , production >
-    vector<ProductionRule> sententialLines; // result
+    vector<string> sententialLines; // result
 
 public:
     CFG(LexicalGeneratorBuilder *_lex)
@@ -39,6 +39,108 @@ public:
     // set  DS of terminals and nonterminals and production rules
     void parseGrammerFile(string grammerFile)
     {
+
+        string line;
+        string input = "";
+
+        ifstream myfile(grammerFile);
+
+        if (myfile)
+        {
+            while (getline(myfile, line))
+            {
+                input += (line + " ");
+            }
+            myfile.close();
+        }
+        std::cout << input << std::endl;
+
+        std::string delimiter1 = "#";
+        std::string delimiter2 = " ";
+        size_t pos1 = 0;
+        size_t pos2 = 0;
+        std::string token;
+        std::string prule;
+        while ((pos1 = input.find(delimiter1)) != std::string::npos)
+        {
+            token = input.substr(0, pos1);
+            std::cout << token << std::endl;
+            int flag = 0;
+            int flag1 = 0; //New Production Rule Flag
+            int flag2 = 0;
+            ProductionRule *pr = new ProductionRule();
+            vector<string> rhs;
+
+            while ((pos2 = token.find(delimiter2)) != std::string::npos)
+            {
+
+                prule = token.substr(0, pos2);
+
+                if (prule != "" && prule != "=")
+                {
+                    if (flag == 0)
+                    {
+                        pr->setLhs(prule);
+                        std::cout << prule << std::endl;
+                        flag = 1;
+                    }
+                    else
+                    {
+                        if (flag1 = 0)
+                        {
+                            rhs.push_back(prule);
+                            pr->setRhs(rhs);
+                            std::cout << prule << std::endl;
+                            flag1 = 1;
+                        }
+                        else
+                        {
+                            if (prule == "|")
+                            {
+                                //New Production Rule
+                                //save current Production rule
+                                productionRules.push_back(pr);
+                                rhs.clear();
+                                string lh = pr->getLhs();
+                                pr->setLhs(lh);
+                                flag2 = 1;
+                                std::cout << lh << std::endl;
+                                std::cout << productionRules.size() << std::endl;
+                            }
+                            else
+
+                            {
+                                if (flag2 == 0)
+                                {
+                                    rhs.push_back(prule);
+                                    pr->setRhs(rhs);
+                                    std::cout << prule << std::endl;
+                                }
+                                else
+                                {
+                                    rhs.push_back(prule);
+                                    pr->setRhs(rhs);
+                                    std::cout << prule << std::endl;
+                                }
+                            }
+                        }
+                    }
+                }
+                token = token.substr(pos2 + delimiter2.length());
+            }
+            std::cout << token << std::endl;
+
+            input.erase(0, pos1 + delimiter1.length());
+        }
+
+        std::cout << input << std::endl;
+        while ((pos2 = input.find(delimiter2)) != std::string::npos)
+        {
+            prule = input.substr(0, pos2);
+            std::cout << prule << std::endl;
+            input = input.substr(pos2 + delimiter2.length());
+        }
+        std::cout << input << std::endl;
     }
     void computeFirstSets()
     {
@@ -180,9 +282,6 @@ public:
                 cout << sss << " ";
             }
             cout << endl;
-        for (ProductionRule* pr : nonTerminals[nonTerm])  {
-            vector<string > rhs = pr->getRhs();
-
         }
     }
 
@@ -225,71 +324,84 @@ public:
     void GenerateParseTable()
     {
     }
-    void parseInput() {
-        stack<string> non_term_st ;
+    void parseInput(){
+        stack<string> non_term_st;
         non_term_st.push("$");
         non_term_st.push(startSymbol);
         string next_token = lexBuilder->nextToken();
-        while(true){
+        while (true)
+        {
             string top_elem = non_term_st.top();
 
-                if(top_elem.compare("$") == 0 && next_token.compare("$") == 0){
-                    ///syso end of processing and accepted
-                    break;
+            if (top_elem.compare("$") == 0 && next_token.compare("$") == 0)
+            {
+                ///syso end of processing and accepted
+                break;
+            }
+            if (top_elem.compare("$") == 0 && next_token.compare("$") != 0)
+            {
+                ///syso end of processing not accepted part of the input
+                ///isnot matched(the stack is empty while the ip is not)
+                break;
+            }
+            //case top is terminal
+            if (terminals.find(top_elem) != terminals.end())
+            {
+                //case matches the i/p
+                if (top_elem.compare(next_token) == 0)
+                {
+                    ///syso matched  next_token
+                    next_token = lexBuilder->nextToken();
+                    non_term_st.pop();
                 }
-                if(top_elem.compare("$") == 0 && next_token.compare("$") != 0){
-                    ///syso end of processing not accepted part of the input
-                    ///isnot matched(the stack is empty while the ip is not)
-                    break;
+                else
+                { // if they dont match
+
+                    ///syso "Warning" missing  top_elem and inserted
+                    non_term_st.pop();
                 }
-                //case top is terminal
-                if(terminals.find(top_elem) != terminals.end()){
-                        //case matches the i/p
-                        if(top_elem.compare(next_token) == 0){
-                            ///syso matched  next_token
-                            next_token = lexBuilder->nextToken();
-                            non_term_st.pop();
-
-                        }else{ // if they dont match
-
-                            ///syso "Warning" missing  top_elem and inserted
-                            non_term_st.pop();
-                        }
-
-                }else{ //case top is non-terminal
-                    unordered_map<string, ProductionRule> row = ll1Table[top_elem];
-                    ///case entry found
-                    if(row.find(next_token) != row.end()){
-                            if(/*not sync production rule*/){
-                            ProductionRule pr = row[next_token];
-                            sententialLines.push_back(pr);
-                            ///syso production rule nfso
-                            next_token = lexBuilder->nextToken();
-                            non_term_st.pop();
-                            if(/*production rule is not epsilon*/){
-                                vector<string> rhs= pr.getRhs();
-                                for(int counter =rhs.size()-1; counter >=0 ;counter--){
-                                    non_term_st.push(rhs[counter]);
-                                }
+            }
+            else
+            { //case top is non-terminal
+                unordered_map<string, ProductionRule> row = ll1Table[top_elem];
+                ///case entry found
+                if (row.find(next_token) != row.end())
+                {
+                    if (/*not sync production rule*/)
+                    {
+                        ProductionRule pr = row[next_token];
+                        sententialLines.push_back(pr);
+                        ///syso production rule nfso
+                        next_token = lexBuilder->nextToken();
+                        non_term_st.pop();
+                        if (/*production rule is not epsilon*/)
+                        {
+                            vector<string> rhs = pr.getRhs();
+                            for (int counter = rhs.size() - 1; counter >= 0; counter--)
+                            {
+                                non_term_st.push(rhs[counter]);
                             }
-                    }else{///sync
+                        }
+                    }
+                    else
+                    { ///sync
                         ///syso error illegal non terminal top_elem , top_elem discarded
                         non_term_st.pop();
                     }
-                    }else{///entry is empty
-
-                        if(next_token.compare("$") == 0){
-                            ///syso not accepted ip ended while stack is not empty yet part of the ip is missing
-                            break;
-                        }
-                        ///syso error illegal non terminal top_elem , next_token discarded
-                        next_token = lexBuilder->nextToken();
-                    }
                 }
+                else
+                { ///entry is empty
 
-
+                    if (next_token.compare("$") == 0)
+                    {
+                        ///syso not accepted ip ended while stack is not empty yet part of the ip is missing
+                        break;
+                    }
+                    ///syso error illegal non terminal top_elem , next_token discarded
+                    next_token = lexBuilder->nextToken();
+                }
+            }
         }
-
     }
     void eliminateLeftRecursion()
     {
