@@ -65,6 +65,7 @@ public:
             unordered_set<string> st = recursivefirstSet(str, vis);
             firstSets[str] = st;
         }
+        firstSets.erase("epsilon");
         cout<<" first sets: " <<endl;
         for (pair<string, unordered_set<string>> ff : firstSets)
         {
