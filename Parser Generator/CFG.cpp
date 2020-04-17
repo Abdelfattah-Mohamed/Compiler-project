@@ -102,6 +102,11 @@ public:
                         non_term_st.pop();
                     }
                     }else{///entry is empty
+
+                        if(next_token.compare("$") == 0){
+                            ///syso not accepted ip ended while stack is not empty yet part of the ip is missing
+                            break;
+                        }
                         ///syso error illegal non terminal top_elem , next_token discarded
                         next_token = lexBuilder->nextToken();
                     }
