@@ -7,23 +7,29 @@ public:
     ProductionRule()
     {
     }
-    ProductionRule(string _rhs, vector<string> _lhs)
+    ProductionRule(string _lhs, vector<string> _rhs)
     {
+        lhs = _lhs;
+        rhs = _rhs;
     }
-    string getRhs()
+    string getLhs()
     {
+        return lhs;
     }
-    vector<string> getLhs()
+    vector<string> getRhs()
     {
+        return rhs;
     }
-    void setLhs(string _rhs)
+    void setLhs(string _lhs)
     {
+        lhs = _lhs;
     }
-    void setRhs(vector<string> _lhs)
+    void setRhs(vector<string> _rhs)
     {
+        rhs = _rhs;
     }
 
 private:
-    string rhs;
-    vector<string> lhs;
+    string lhs;
+    vector<string> rhs;
 };
