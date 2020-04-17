@@ -131,6 +131,7 @@ public:
             std::cout << token << std::endl;
 
             input.erase(0, pos1 + delimiter1.length());
+           
         }
 
         std::cout << input << std::endl;

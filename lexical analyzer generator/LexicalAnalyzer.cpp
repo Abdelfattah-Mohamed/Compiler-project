@@ -81,7 +81,12 @@ public:
 
     void tock_all(string input)
     {
-        freopen("output.txt", "w", stdout);
+        fstream file;
+        file.open("output.txt", ios::out);
+        streambuf *stream_buffer_cout = cout.rdbuf();
+        streambuf *stream_buffer_cin = cin.rdbuf();
+        streambuf *stream_buffer_file = file.rdbuf();
+        cout.rdbuf(stream_buffer_file);
         string ret = "";
         for (char c : input)
         {
@@ -96,5 +101,7 @@ public:
         }
         if (!ret.empty())
             tokenize(ret);
+        cout.rdbuf(stream_buffer_cout);
+        file.close();
     }
 };
