@@ -54,7 +54,7 @@ public:
             token_ptr++;
             return str;
         }
-        return "";
+        return "$";
     }
 
 private:

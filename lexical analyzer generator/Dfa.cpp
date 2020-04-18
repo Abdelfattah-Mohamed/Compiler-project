@@ -339,32 +339,51 @@ private:
     }
 
     void printing_dfa() {
-        FILE  * file= freopen("dfa.txt", "w", stdout);
+        fstream file;
+        file.open("dfa.txt", ios::out);
+        string line;
+        streambuf *stream_buffer_cout = cout.rdbuf();
+        streambuf *stream_buffer_cin = cin.rdbuf();
+        streambuf *stream_buffer_file = file.rdbuf();
+        cout.rdbuf(stream_buffer_file);
+        
         int n = this->dfa_mini.size();
         cout << " Dfa ";
         for (int i = 1; i < 128; i++) {
-            if(i != 10 && i != 13) printf("| %c|", i);
+            if(i != 10 && i != 13) cout<<"| "<<((char)i)<<"|";
             else cout << "|  |";
         }
         cout << endl;
         for (int i = 1; i < 128; i++) cout << "____";
         cout << endl;
         for (int i = 0; i < n; i++) {
-            printf("%02d : ", i);
+            cout << setw(2) << setfill('0') << i << " : ";
             for(int j = 1; j < 128; j++) {
-                printf("|%02d|", this->dfa_mini[i][j]);
+                cout << "|" << setw(2) << setfill('0') << this->dfa_mini[i][j] << "|";
             }
             cout << endl;
         }
+        
+        cout.rdbuf(stream_buffer_cout);
+        file.close();
     }
 
     void printing_acceptance() {
-        FILE * file = freopen("accept.txt", "w", stdout);
+        fstream file;
+        file.open("accept.txt", ios::out);
+        string line;
+        streambuf *stream_buffer_cout = cout.rdbuf();
+        streambuf *stream_buffer_cin = cin.rdbuf();
+        streambuf *stream_buffer_file = file.rdbuf();
+        cout.rdbuf(stream_buffer_file);
+
         vector<pair<int, string>> vec;
         for(auto x : this->accept_state_dfa_mini) vec.push_back({x.first, x.second});
         sort(vec.begin(), vec.end());
         for(auto x : vec) cout << x.first << " => " << x.second << endl;
-      
+        
+        cout.rdbuf(stream_buffer_cout);
+        file.close();
     }
 
 public:
