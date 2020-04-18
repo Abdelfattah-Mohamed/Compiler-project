@@ -21,18 +21,15 @@ private:
 public:
     CFG(LexicalGeneratorBuilder *_lex)
     {
-        
     }
     // set  DS of terminals and nonterminals and production rules
     void parseGrammerFile(string grammerFile)
     {
-        
-
         string line;
         string input = "";
-        
+
         ifstream myfile(grammerFile);
-        
+
         if (myfile)
         {
             while (getline(myfile, line))
@@ -41,7 +38,7 @@ public:
             }
             myfile.close();
         }
-        std::cout << input << std::endl;
+        input = input + " #";
 
         std::string delimiter1 = "#";
         std::string delimiter2 = " ";
@@ -74,10 +71,16 @@ public:
                     }
                     else
                     {
-                        if (flag1 = 0)
+                        if (flag1 == 0)
                         {
+                            if (prule.at(0) == '\'')
+                            {
+                                prule.erase(0, 1);
+                                prule.erase(prule.size() - 1);
+                            }
                             rhs.push_back(prule);
                             pr->setRhs(rhs);
+                            terminals.insert(prule);
                             std::cout << prule << std::endl;
                             flag1 = 1;
                         }
@@ -88,47 +91,71 @@ public:
                                 //New Production Rule
                                 //save current Production rule
                                 productionRules.push_back(pr);
+
                                 rhs.clear();
-                                string lh = pr->getLhs();                                
+                                string lh = pr->getLhs();
                                 pr->setLhs(lh);
                                 flag2 = 1;
                                 std::cout << lh << std::endl;
                                 std::cout << productionRules.size() << std::endl;
-
                             }
                             else
-            
+
                             {
                                 if (flag2 == 0)
-                                {   
+                                {
+                                    if (prule.at(0) == '\'')
+                                    {
+                                        prule.erase(0, 1);
+                                        prule.erase(prule.size() - 1);
+                                    }
                                     rhs.push_back(prule);
                                     pr->setRhs(rhs);
+                                    terminals.insert(prule);
                                     std::cout << prule << std::endl;
                                 }
-                                else{
+                                else
+                                {
+                                    if (prule.at(0) == '\'')
+                                    {
+                                        prule.erase(0, 1);
+                                        prule.erase(prule.size() - 1);
+                                    }
                                     rhs.push_back(prule);
                                     pr->setRhs(rhs);
+                                    terminals.insert(prule);
                                     std::cout << prule << std::endl;
                                 }
                             }
                         }
                     }
                 }
+
                 token = token.substr(pos2 + delimiter2.length());
             }
+            if (pr->getLhs() != "")
+            {
+                productionRules.push_back(pr);
+            }
+            rhs.clear();
+            std::cout << productionRules.size() << std::endl;
             std::cout << token << std::endl;
-
             input.erase(0, pos1 + delimiter1.length());
         }
-
-        std::cout << input << std::endl;
-        while ((pos2 = input.find(delimiter2)) != std::string::npos)
+        for (ProductionRule *pr : productionRules)
         {
-            prule = input.substr(0, pos2);
-            std::cout << prule << std::endl;
-            input = input.substr(pos2 + delimiter2.length());
+            if ( nonTerminals.count(pr->getLhs()) > 0)
+            {   vector<ProductionRule *> temp = nonTerminals[pr->getLhs()];
+                temp.push_back(pr);
+                nonTerminals[pr->getLhs()] = temp ;
+            }
+            else
+            {   
+                nonTerminals[pr->getLhs()].push_back(pr);
+
+            }
         }
-        std::cout << input << std::endl;
+
     }
     void computeFirstSets()
     {
