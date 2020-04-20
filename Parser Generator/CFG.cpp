@@ -15,7 +15,7 @@ private:
     unordered_map<string, unordered_set<string>> FollowSets;
     unordered_map<string, unordered_map<string, ProductionRule>> ll1Table;
     // non terminal , <ternminal , production >
-    vector<string> sententialLines; // result
+    vector<ProductionRule> sententialLines; // result
 
 public:
     CFG(LexicalGeneratorBuilder *_lex)
@@ -131,7 +131,7 @@ public:
             std::cout << token << std::endl;
 
             input.erase(0, pos1 + delimiter1.length());
-           
+
         }
 
         std::cout << input << std::endl;
@@ -147,14 +147,14 @@ public:
     {
         /***
          * directed graph based algorithm for computing the first sets :
-         * an edge(A,B) is included to the graph if first (B) is subset of first(A)   
-         * so by doing a depth first search for every unvisited node we can construct all 
+         * an edge(A,B) is included to the graph if first (B) is subset of first(A)
+         * so by doing a depth first search for every unvisited node we can construct all
          * the first sets of the grammar
-         * conclusions: from the properties of LL1 is that it is not left recursive so 
-         * there would not be any cycle in the graph  (path of A to A not exist)so the graph is 
+         * conclusions: from the properties of LL1 is that it is not left recursive so
+         * there would not be any cycle in the graph  (path of A to A not exist)so the graph is
          * DAG so no strongly connected components is of size > 1 proving that the algorithm
          * would not reach a case of  INFIINITE LOOP
-         * complextixity is O(V+E) 
+         * complextixity is O(V+E)
          * */
         unordered_set<string> vis;
         for (string term : terminals)
@@ -211,7 +211,7 @@ public:
     {
         /**
          * compute follow from first sets
-         * for each production rule if a nonterminal X followed by sequence beta then 
+         * for each production rule if a nonterminal X followed by sequence beta then
          * all first set of beta is included in the follow set of X
         */
         FollowSets[startSymbol].insert("$");
@@ -237,14 +237,14 @@ public:
                 }
             }
         }
-       
+
         /**
-         * 
+         *
          * construcing directed graph where edge (A,B) exists if followset(A) includes followset(B) or
-         * follow(B) is subset of follow(A) , there could exist a cycle in this graph producing 
+         * follow(B) is subset of follow(A) , there could exist a cycle in this graph producing
          * Strongly connected components where the follow(members) of this SCC equal to each other
-         * Tarjan's algorithm make the way through this graph and finding all the included follow sets 
-         * in each non terminal by combining the follow sets of all the members of a SCC 
+         * Tarjan's algorithm make the way through this graph and finding all the included follow sets
+         * in each non terminal by combining the follow sets of all the members of a SCC
          * into a set which would be the followset of each member in SCC
          */
         unordered_map<string, unordered_set<string>> adjList;
@@ -286,7 +286,7 @@ public:
         }
     }
 
-    void dfs(string at,int &id ,unordered_map<string, unordered_set<string>> &adjList, 
+    void dfs(string at,int &id ,unordered_map<string, unordered_set<string>> &adjList,
             unordered_set<string> &onStack,unordered_map<string, int> &ids,
              unordered_map<string, int> &lowLink, stack<string> &stack)
     {
@@ -313,18 +313,88 @@ public:
                 vec.push_back(top);
                 onStack.erase(top);
                 lowLink[top] = ids[at];
-                combined.insert(FollowSets[top].begin(),FollowSets[top].end()); 
+                combined.insert(FollowSets[top].begin(),FollowSets[top].end());
                 if(top == at)
                     break;
             }
             for(string v : vec){
-                FollowSets[v].insert(combined.begin(), combined.end()); 
+                FollowSets[v].insert(combined.begin(), combined.end());
             }
         }
     }
     void GenerateParseTable()
     {
+        /**/
+        terminals.insert("$");
+         for (auto NT : nonTerminals){
+                string lhs = NT.first;
+                vector<ProductionRule *> rhss = NT.second;
+                unordered_set<string> first = firstSets[lhs];
+                unordered_set<string> follow = FollowSets[lhs];
+                unordered_map<string, ProductionRule> entry ;
+                    for (auto itr : terminals){
+                    string T = itr;
+                    ProductionRule pr ;
+                    pr.setLhs(lhs);
+                    if(first.find(T) != first.end()){//case in first set
+
+                        for(int counter=0;counter<rhss.size();counter++){
+                            ProductionRule * pr_ptr = rhss[counter];
+                            if(find_pr(T,pr_ptr)){
+
+                                    pr.setRhs(pr_ptr->getRhs());
+                                    entry[T]=pr;
+                                    break;
+                            }
+                        }
+
+
+                    }else if(follow.find(T) != follow.end()){ // case in follow set
+                        vector<string> vec;
+
+
+
+                        if(first.find("Epsilon") != first.end()){// epsilon case
+                            vec.push_back("Epsilon");
+                            pr.setRhs(vec);
+                            entry[T]=pr;
+
+                        }else{ // sync case
+                            vec.push_back("Sync");
+                            pr.setRhs(vec);
+                            entry[T]=pr;
+                        }
+                    }
+                    //case entry is empty nothing happens
+
+
+
+                }
+                ll1Table[lhs] = entry;
+
+
+         }
+
+
     }
+    bool find_pr(string T,ProductionRule *pr_ptr){
+        string NT = pr_ptr->getLhs();
+        vector<string> rhs = pr_ptr->getRhs();
+        for(int counter=0;counter<rhs.size();counter++){
+            string curr = rhs[counter];
+            unordered_set<string> curr_first = firstSets[curr];
+            if(curr_first.find(T) != curr_first.end()){
+                return true;
+            }
+            if(curr_first.find("Epsilon") == curr_first.end()){
+                break;
+            }
+        }
+        return false;
+    }
+
+
+
     void parseInput(){
         stack<string> non_term_st;
         non_term_st.push("$");
@@ -336,13 +406,14 @@ public:
 
             if (top_elem.compare("$") == 0 && next_token.compare("$") == 0)
             {
-                ///syso end of processing and accepted
+                cout << "end of procesing and ACCEPTED" <<endl;
                 break;
             }
             if (top_elem.compare("$") == 0 && next_token.compare("$") != 0)
             {
-                ///syso end of processing not accepted part of the input
-                ///isnot matched(the stack is empty while the ip is not)
+
+                cout << "end of processing and NOT ACCEPTED part of the input "
+                <<"isnot matched(the stack is empty while the ip is not)"<<endl;
                 break;
             }
             //case top is terminal
@@ -351,14 +422,15 @@ public:
                 //case matches the i/p
                 if (top_elem.compare(next_token) == 0)
                 {
-                    ///syso matched  next_token
+                    cout << next_token << " matched"<<endl;
                     next_token = lexBuilder->nextToken();
                     non_term_st.pop();
                 }
                 else
                 { // if they dont match
 
-                    ///syso "Warning" missing  top_elem and inserted
+
+                    cout<<"ERROR : missing " << top_elem << " and inserted in input"<<endl;
                     non_term_st.pop();
                 }
             }
@@ -368,37 +440,46 @@ public:
                 ///case entry found
                 if (row.find(next_token) != row.end())
                 {
-                    if (/*not sync production rule*/)
-                    {
+
                         ProductionRule pr = row[next_token];
                         sententialLines.push_back(pr);
-                        ///syso production rule nfso
-                        next_token = lexBuilder->nextToken();
+                        vector<string> rhs = pr.getRhs();
+
+                        /*next_token = lexBuilder->nextToken();*/
                         non_term_st.pop();
-                        if (/*production rule is not epsilon*/)
+                        if (rhs[0] != "Sync")
+                    {
+                        if (rhs[0] != "Epsilon" )
                         {
-                            vector<string> rhs = pr.getRhs();
+
                             for (int counter = rhs.size() - 1; counter >= 0; counter--)
                             {
                                 non_term_st.push(rhs[counter]);
                             }
+                            string s = pr.getLhs()+" --> ";
+                        for(int counter =0;counter<rhs.size();counter++){
+                            s+=rhs[counter];
                         }
+                        cout<< s << endl;
+                        }else{
+                            cout <<top_elem<<" --> Epsilon"<<endl;
+                        }
+                    }else{
+                        cout << "ERROR sync entry: "<< top_elem<<"missing and discarded from stack"<<endl;
                     }
-                    else
-                    { ///sync
-                        ///syso error illegal non terminal top_elem , top_elem discarded
-                        non_term_st.pop();
-                    }
+
                 }
                 else
                 { ///entry is empty
 
                     if (next_token.compare("$") == 0)
                     {
-                        ///syso not accepted ip ended while stack is not empty yet part of the ip is missing
+                        cout << "process end and NOT ACCEPTED part of the input is missing"
+                        <<"stack is not empty while the i/p finished"<<endl;
+
                         break;
                     }
-                    ///syso error illegal non terminal top_elem , next_token discarded
+                    cout<<"ERROR empty entry: illegal input " << next_token << " discarded from i/p"<<endl;
                     next_token = lexBuilder->nextToken();
                 }
             }
