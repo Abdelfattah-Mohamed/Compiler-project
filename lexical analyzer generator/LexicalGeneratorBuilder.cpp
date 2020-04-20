@@ -56,7 +56,9 @@ public:
         }
         return "$";
     }
-
+    void setTokens_dev(vector<string> _tokens){
+        tokens = _tokens;
+    }
 private:
     string inputPath;
     string rulesPath;

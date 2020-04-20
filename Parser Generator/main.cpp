@@ -5,12 +5,10 @@ using namespace std;
 int main()
 {
 
-     lex = new LexicalGeneratorBuilder("input.txt", "lex_rules_ip.txt");
-     lex->buildGenerator();
-    CFG *cfg = new CFG(lex);
-    cfg->computeFirstSets();    
-    cfg->computeFollowSets();
-    cfg->parseGrammerFile("inputt.txt");
-
+    LexicalGeneratorBuilder *lex = new LexicalGeneratorBuilder("input.txt", "lex_rules_ip.txt");
+    vector<string> tokens = {"(", "id", "+", "(", "*", "id", ")"};
+    lex->setTokens_dev(tokens);
+    CFG *cfg = new CFG(lex, "grammer.txt");
+    cfg->BuildParser();
     return 0;
 }

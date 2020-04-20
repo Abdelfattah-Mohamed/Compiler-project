@@ -7,6 +7,7 @@ class CFG
 private:
     /// add helper functions
     string startSymbol;
+    string grammerFile;
     LexicalGeneratorBuilder *lexBuilder;
     unordered_set<string> terminals;
     unordered_map<string, vector<ProductionRule *>> nonTerminals;
@@ -18,24 +19,29 @@ private:
     vector<ProductionRule> sententialLines; // result
 
 public:
-    CFG(LexicalGeneratorBuilder *_lex)
+    CFG(LexicalGeneratorBuilder *_lex, string _grammerFile)
     {
-        startSymbol = "E";
-        terminals = {"*", "+", "(", ")", "int", "epsilon"};
-        ProductionRule *p1 = new ProductionRule("E", {"T", "X"});
-        ProductionRule *p2 = new ProductionRule("T", {"(", "E", ")"});
-        ProductionRule *p3 = new ProductionRule("T", {"int", "Y"});
-        ProductionRule *p4 = new ProductionRule("X", {"+", "E"});
-        ProductionRule *p5 = new ProductionRule("X", {"epsilon"});
-        ProductionRule *p6 = new ProductionRule("Y", {"epsilon"});
-        ProductionRule *p7 = new ProductionRule("Y", {"*", "T"});
-        productionRules = {p1, p2, p3, p4, p5, p6, p7};
-        nonTerminals["T"] = {p2, p3};
-        nonTerminals["E"] = {p1};
-        nonTerminals["X"] = {p4, p5};
-        nonTerminals["Y"] = {p6, p7};
+        grammerFile = _grammerFile;
+        lexBuilder = _lex;
     }
+    void BuildParser()
+    {
+        parseGrammerFile(grammerFile);
+        for(string nont : nonTerminals ){
+            cout<<nont<<" ";
+        }
+        cout<<endl;
+        for (production : nonTerminals)
+        {
+            cout << nont << " ";
+        }
+        cout << endl;
 
+        computeFirstSets();
+        computeFollowSets();
+        GenerateParseTable();
+        parseInput();
+    }
     // set  DS of terminals and nonterminals and production rules
     void parseGrammerFile(string grammerFile)
     {
@@ -156,22 +162,20 @@ public:
             std::cout << productionRules.size() << std::endl;
             std::cout << token << std::endl;
             input.erase(0, pos1 + delimiter1.length());
-
         }
         for (ProductionRule *pr : productionRules)
         {
-            if ( nonTerminals.count(pr->getLhs()) > 0)
-            {   vector<ProductionRule *> temp = nonTerminals[pr->getLhs()];
+            if (nonTerminals.count(pr->getLhs()) > 0)
+            {
+                vector<ProductionRule *> temp = nonTerminals[pr->getLhs()];
                 temp.push_back(pr);
-                nonTerminals[pr->getLhs()] = temp ;
+                nonTerminals[pr->getLhs()] = temp;
             }
             else
-            {   
+            {
                 nonTerminals[pr->getLhs()].push_back(pr);
-
             }
         }
-
     }
     void computeFirstSets()
     {
@@ -199,7 +203,7 @@ public:
             firstSets[str] = st;
         }
         firstSets.erase("epsilon");
-        cout<<" first sets: " <<endl;
+        cout << " first sets: " << endl;
         for (pair<string, unordered_set<string>> ff : firstSets)
         {
             cout << ff.first << " : ";
@@ -209,7 +213,7 @@ public:
             }
             cout << endl;
         }
-        cout<<endl;
+        cout << endl;
     }
     unordered_set<string> recursivefirstSet(string nonTerm, unordered_set<string> &vis)
     {
@@ -301,10 +305,10 @@ public:
         {
             string node = p.first;
             if (!ids.count(node))
-                dfs(node,id,adjList,onStack,ids,lowLink,stack);
+                dfs(node, id, adjList, onStack, ids, lowLink, stack);
             FollowSets[node].erase("epsilon");
         }
-        cout<<"follow sets"<<endl;
+        cout << "follow sets" << endl;
         for (pair<string, unordered_set<string>> ff : FollowSets)
         {
             cout << ff.first << " : ";
@@ -316,8 +320,8 @@ public:
         }
     }
 
-    void dfs(string at,int &id ,unordered_map<string, unordered_set<string>> &adjList,
-            unordered_set<string> &onStack,unordered_map<string, int> &ids,
+    void dfs(string at, int &id, unordered_map<string, unordered_set<string>> &adjList,
+             unordered_set<string> &onStack, unordered_map<string, int> &ids,
              unordered_map<string, int> &lowLink, stack<string> &stack)
     {
         stack.push(at);
@@ -325,29 +329,35 @@ public:
         ids[at] = id;
         lowLink[at] = id;
         id++;
-        for(string to :  adjList[at]){
-            if(!ids.count(to)){
-                dfs(to,id,adjList,onStack,ids,lowLink,stack);
+        for (string to : adjList[at])
+        {
+            if (!ids.count(to))
+            {
+                dfs(to, id, adjList, onStack, ids, lowLink, stack);
             }
-            if(onStack.count(to)){
-                lowLink[at] = min(lowLink[at] , lowLink[to]);
+            if (onStack.count(to))
+            {
+                lowLink[at] = min(lowLink[at], lowLink[to]);
             }
             FollowSets[at].insert(FollowSets[to].begin(), FollowSets[to].end());
         }
-        if(ids[at] == lowLink[at]){
+        if (ids[at] == lowLink[at])
+        {
             unordered_set<string> combined;
             vector<string> vec;
-            while(!stack.empty()){
-                string top =  stack.top();
+            while (!stack.empty())
+            {
+                string top = stack.top();
                 stack.pop();
                 vec.push_back(top);
                 onStack.erase(top);
                 lowLink[top] = ids[at];
-                combined.insert(FollowSets[top].begin(),FollowSets[top].end());
-                if(top == at)
+                combined.insert(FollowSets[top].begin(), FollowSets[top].end());
+                if (top == at)
                     break;
             }
-            for(string v : vec){
+            for (string v : vec)
+            {
                 FollowSets[v].insert(combined.begin(), combined.end());
             }
         }
@@ -356,76 +366,77 @@ public:
     {
         /**/
         terminals.insert("$");
-         for (auto NT : nonTerminals){
-                string lhs = NT.first;
-                vector<ProductionRule *> rhss = NT.second;
-                unordered_set<string> first = firstSets[lhs];
-                unordered_set<string> follow = FollowSets[lhs];
-                unordered_map<string, ProductionRule> entry ;
-                    for (auto itr : terminals){
-                    string T = itr;
-                    ProductionRule pr ;
-                    pr.setLhs(lhs);
-                    if(first.find(T) != first.end()){//case in first set
+        for (auto NT : nonTerminals)
+        {
+            string lhs = NT.first;
+            vector<ProductionRule *> rhss = NT.second;
+            unordered_set<string> first = firstSets[lhs];
+            unordered_set<string> follow = FollowSets[lhs];
+            unordered_map<string, ProductionRule> entry;
+            for (auto itr : terminals)
+            {
+                string T = itr;
+                ProductionRule pr;
+                pr.setLhs(lhs);
+                if (first.find(T) != first.end())
+                { //case in first set
 
-                        for(int counter=0;counter<rhss.size();counter++){
-                            ProductionRule * pr_ptr = rhss[counter];
-                            if(find_pr(T,pr_ptr)){
+                    for (int counter = 0; counter < rhss.size(); counter++)
+                    {
+                        ProductionRule *pr_ptr = rhss[counter];
+                        if (find_pr(T, pr_ptr))
+                        {
 
-                                    pr.setRhs(pr_ptr->getRhs());
-                                    entry[T]=pr;
-                                    break;
-                            }
-                        }
-
-
-                    }else if(follow.find(T) != follow.end()){ // case in follow set
-                        vector<string> vec;
-
-
-
-                        if(first.find("Epsilon") != first.end()){// epsilon case
-                            vec.push_back("Epsilon");
-                            pr.setRhs(vec);
-                            entry[T]=pr;
-
-                        }else{ // sync case
-                            vec.push_back("Sync");
-                            pr.setRhs(vec);
-                            entry[T]=pr;
+                            pr.setRhs(pr_ptr->getRhs());
+                            entry[T] = pr;
+                            break;
                         }
                     }
-                    //case entry is empty nothing happens
-
-
-
                 }
-                ll1Table[lhs] = entry;
+                else if (follow.find(T) != follow.end())
+                { // case in follow set
+                    vector<string> vec;
 
-
-         }
-
-
+                    if (first.find("Epsilon") != first.end())
+                    { // epsilon case
+                        vec.push_back("Epsilon");
+                        pr.setRhs(vec);
+                        entry[T] = pr;
+                    }
+                    else
+                    { // sync case
+                        vec.push_back("Sync");
+                        pr.setRhs(vec);
+                        entry[T] = pr;
+                    }
+                }
+                //case entry is empty nothing happens
+            }
+            ll1Table[lhs] = entry;
+        }
     }
-    bool find_pr(string T,ProductionRule *pr_ptr){
+    bool find_pr(string T, ProductionRule *pr_ptr)
+    {
         string NT = pr_ptr->getLhs();
         vector<string> rhs = pr_ptr->getRhs();
-        for(int counter=0;counter<rhs.size();counter++){
+        for (int counter = 0; counter < rhs.size(); counter++)
+        {
             string curr = rhs[counter];
             unordered_set<string> curr_first = firstSets[curr];
-            if(curr_first.find(T) != curr_first.end()){
+            if (curr_first.find(T) != curr_first.end())
+            {
                 return true;
             }
-            if(curr_first.find("Epsilon") == curr_first.end()){
+            if (curr_first.find("Epsilon") == curr_first.end())
+            {
                 break;
             }
         }
         return false;
     }
 
-
-
-    void parseInput(){
+    void parseInput()
+    {
         stack<string> non_term_st;
         non_term_st.push("$");
         non_term_st.push(startSymbol);
@@ -436,14 +447,14 @@ public:
 
             if (top_elem.compare("$") == 0 && next_token.compare("$") == 0)
             {
-                cout << "end of procesing and ACCEPTED" <<endl;
+                cout << "end of procesing and ACCEPTED" << endl;
                 break;
             }
             if (top_elem.compare("$") == 0 && next_token.compare("$") != 0)
             {
 
                 cout << "end of processing and NOT ACCEPTED part of the input "
-                <<"isnot matched(the stack is empty while the ip is not)"<<endl;
+                     << "isnot matched(the stack is empty while the ip is not)" << endl;
                 break;
             }
             //case top is terminal
@@ -452,15 +463,14 @@ public:
                 //case matches the i/p
                 if (top_elem.compare(next_token) == 0)
                 {
-                    cout << next_token << " matched"<<endl;
+                    cout << next_token << " matched" << endl;
                     next_token = lexBuilder->nextToken();
                     non_term_st.pop();
                 }
                 else
                 { // if they dont match
 
-
-                    cout<<"ERROR : missing " << top_elem << " and inserted in input"<<endl;
+                    cout << "ERROR : missing " << top_elem << " and inserted in input" << endl;
                     non_term_st.pop();
                 }
             }
@@ -471,33 +481,37 @@ public:
                 if (row.find(next_token) != row.end())
                 {
 
-                        ProductionRule pr = row[next_token];
-                        sententialLines.push_back(pr);
-                        vector<string> rhs = pr.getRhs();
+                    ProductionRule pr = row[next_token];
+                    sententialLines.push_back(pr);
+                    vector<string> rhs = pr.getRhs();
 
-                        /*next_token = lexBuilder->nextToken();*/
-                        non_term_st.pop();
-                        if (rhs[0] != "Sync")
+                    /*next_token = lexBuilder->nextToken();*/
+                    non_term_st.pop();
+                    if (rhs[0] != "Sync")
                     {
-                        if (rhs[0] != "Epsilon" )
+                        if (rhs[0] != "Epsilon")
                         {
 
                             for (int counter = rhs.size() - 1; counter >= 0; counter--)
                             {
                                 non_term_st.push(rhs[counter]);
                             }
-                            string s = pr.getLhs()+" --> ";
-                        for(int counter =0;counter<rhs.size();counter++){
-                            s+=rhs[counter];
+                            string s = pr.getLhs() + " --> ";
+                            for (int counter = 0; counter < rhs.size(); counter++)
+                            {
+                                s += rhs[counter];
+                            }
+                            cout << s << endl;
                         }
-                        cout<< s << endl;
-                        }else{
-                            cout <<top_elem<<" --> Epsilon"<<endl;
+                        else
+                        {
+                            cout << top_elem << " --> Epsilon" << endl;
                         }
-                    }else{
-                        cout << "ERROR sync entry: "<< top_elem<<"missing and discarded from stack"<<endl;
                     }
-
+                    else
+                    {
+                        cout << "ERROR sync entry: " << top_elem << "missing and discarded from stack" << endl;
+                    }
                 }
                 else
                 { ///entry is empty
@@ -505,11 +519,11 @@ public:
                     if (next_token.compare("$") == 0)
                     {
                         cout << "process end and NOT ACCEPTED part of the input is missing"
-                        <<"stack is not empty while the i/p finished"<<endl;
+                             << "stack is not empty while the i/p finished" << endl;
 
                         break;
                     }
-                    cout<<"ERROR empty entry: illegal input " << next_token << " discarded from i/p"<<endl;
+                    cout << "ERROR empty entry: illegal input " << next_token << " discarded from i/p" << endl;
                     next_token = lexBuilder->nextToken();
                 }
             }
