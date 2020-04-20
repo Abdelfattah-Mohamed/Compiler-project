@@ -5,7 +5,8 @@ using namespace std;
 class CFG
 {
 private:
-    /// add helper functions
+    // add helper functions
+    string eps;
     string startSymbol;
     string grammerFile;
     LexicalGeneratorBuilder *lexBuilder;
@@ -21,6 +22,8 @@ private:
 public:
     CFG(LexicalGeneratorBuilder *_lex, string _grammerFile)
     {
+       
+        eps = "Epsilon";
         grammerFile = _grammerFile;
         lexBuilder = _lex;
     }
@@ -36,7 +39,7 @@ public:
     // set  DS of terminals and nonterminals and production rules
     void parseGrammerFile(string grammerFile)
     {
-
+       
         string line;
         string input = "";
 
@@ -51,13 +54,13 @@ public:
             myfile.close();
         }
         input = input + " #";
-
         std::string delimiter1 = "#";
         std::string delimiter2 = " ";
         size_t pos1 = 0;
         size_t pos2 = 0;
         std::string token;
         std::string prule;
+        bool startSymbolSet = false;
         while ((pos1 = input.find(delimiter1)) != std::string::npos)
         {
             token = input.substr(0, pos1);
@@ -77,7 +80,10 @@ public:
                     if (flag == 0)
                     {
                         pr->setLhs(prule);
-
+                        if(!startSymbolSet){
+                            startSymbolSet = true;
+                            startSymbol = prule;
+                        }
                         flag = 1;
                     }
                     else
@@ -188,18 +194,17 @@ public:
 
         for (const auto &elem : terminals)
         {
-            cout << elem << endl;
+            cout << elem <<" ";
         }
-
+        cout<<endl;
         for (std::size_t i = 0; i < productionRules.size(); ++i)
         {
-            std::cout << productionRules[i]->getLhs() << "le"
-                      << "\n";
+            std::cout << productionRules[i]->getLhs() << ": ";
             for (std::size_t j = 0; j < productionRules[i]->getRhs().size(); ++j)
             {
-                std::cout << productionRules[i]->getRhs()[j] << "ri"
-                          << "\n";
+                std::cout << productionRules[i]->getRhs()[j] <<" " ;
             }
+            cout<<endl;
         }
     }
     void computeFirstSets()
@@ -227,8 +232,8 @@ public:
             unordered_set<string> st = recursivefirstSet(str, vis);
             firstSets[str] = st;
         }
-        firstSets.erase("epsilon");
-        cout << " first sets: " << endl;
+        firstSets.erase(eps);
+        cout << "first sets: " << endl;
         for (pair<string, unordered_set<string>> ff : firstSets)
         {
             cout << ff.first << " : ";
@@ -255,12 +260,12 @@ public:
             {
                 unordered_set<string> st = recursivefirstSet(s, vis);
                 firstSets[nonTerm].insert(st.begin(), st.end());
-                if (!st.count("epsilon"))
+                if (!st.count(eps))
                     break;
                 i++;
             }
             if (i == rhs.size())
-                firstSets[nonTerm].insert("epsilon");
+                firstSets[nonTerm].insert(eps);
         }
 
         return firstSets[nonTerm];
@@ -285,8 +290,8 @@ public:
             {
                 string prev = rhs[i];
                 FollowSets[prev].insert(first_next.begin(), first_next.end());
-                FollowSets[prev].erase("epsilon");
-                if (firstSets[prev].count("epsilon"))
+                FollowSets[prev].erase(eps);
+                if (firstSets[prev].count(eps))
                 {
                     first_next = FollowSets[prev];
                 }
@@ -316,11 +321,11 @@ public:
             {
                 string str = rhs[i];
                 adjList[str].insert(lhs);
-                if (!firstSets[str].count("epsilon"))
+                if (!firstSets[str].count(eps))
                     break;
             }
         }
-        adjList.erase("epsilon");
+        adjList.erase(eps);
         unordered_set<string> onStack;
         unordered_map<string, int> ids;
         unordered_map<string, int> lowLink;
@@ -331,7 +336,7 @@ public:
             string node = p.first;
             if (!ids.count(node))
                 dfs(node, id, adjList, onStack, ids, lowLink, stack);
-            FollowSets[node].erase("epsilon");
+            FollowSets[node].erase(eps);
         }
         cout << "follow sets" << endl;
         for (pair<string, unordered_set<string>> ff : FollowSets)
