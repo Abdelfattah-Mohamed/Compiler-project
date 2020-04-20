@@ -10,5 +10,10 @@ int main()
     lex->setTokens_dev(tokens);
     CFG *cfg = new CFG(lex, "grammer.txt");
     cfg->BuildParser();
-    return 0;
+
+
+   
+
+
+return 0;
 }

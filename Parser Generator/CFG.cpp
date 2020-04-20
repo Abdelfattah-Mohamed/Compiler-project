@@ -27,15 +27,6 @@ public:
     void BuildParser()
     {
         parseGrammerFile(grammerFile);
-        for(string nont : nonTerminals ){
-            cout<<nont<<" ";
-        }
-        cout<<endl;
-        for (production : nonTerminals)
-        {
-            cout << nont << " ";
-        }
-        cout << endl;
 
         computeFirstSets();
         computeFollowSets();
@@ -70,7 +61,6 @@ public:
         while ((pos1 = input.find(delimiter1)) != std::string::npos)
         {
             token = input.substr(0, pos1);
-            std::cout << token << std::endl;
             int flag = 0;
             int flag1 = 0; //New Production Rule Flag
             int flag2 = 0;
@@ -87,7 +77,7 @@ public:
                     if (flag == 0)
                     {
                         pr->setLhs(prule);
-                        std::cout << prule << std::endl;
+
                         flag = 1;
                     }
                     else
@@ -98,11 +88,15 @@ public:
                             {
                                 prule.erase(0, 1);
                                 prule.erase(prule.size() - 1);
+                                terminals.insert(prule);
+                            }
+                            if (prule.compare("Epsilon") == 0)
+                            {
+                                terminals.insert(prule);
                             }
                             rhs.push_back(prule);
                             pr->setRhs(rhs);
-                            terminals.insert(prule);
-                            std::cout << prule << std::endl;
+
                             flag1 = 1;
                         }
                         else
@@ -111,14 +105,24 @@ public:
                             {
                                 //New Production Rule
                                 //save current Production rule
-                                productionRules.push_back(pr);
+                                /*cout << productionRules.size() << endl;
+                                cout << pr->getLhs() << endl;
+                                for (std::size_t j = 0; j < pr->getRhs().size(); ++j)
+                                {
+                                    std::cout << pr->getRhs()[j] << "ri"
+                                              << "\n";
+                                }*/
+                                ProductionRule *tempo = new ProductionRule();
+                                tempo ;
+                                productionRules.push_back(tempo);
+                                productionRules[productionRules.size()-1]->setLhs(pr->getLhs());
+                                productionRules[productionRules.size()-1]->setRhs(pr->getRhs());
+                                
 
                                 rhs.clear();
                                 string lh = pr->getLhs();
                                 pr->setLhs(lh);
                                 flag2 = 1;
-                                std::cout << lh << std::endl;
-                                std::cout << productionRules.size() << std::endl;
                             }
                             else
 
@@ -129,11 +133,14 @@ public:
                                     {
                                         prule.erase(0, 1);
                                         prule.erase(prule.size() - 1);
+                                        terminals.insert(prule);
+                                    }
+                                    if (prule.compare("Epsilon") == 0)
+                                    {
+                                        terminals.insert(prule);
                                     }
                                     rhs.push_back(prule);
                                     pr->setRhs(rhs);
-                                    terminals.insert(prule);
-                                    std::cout << prule << std::endl;
                                 }
                                 else
                                 {
@@ -141,11 +148,14 @@ public:
                                     {
                                         prule.erase(0, 1);
                                         prule.erase(prule.size() - 1);
+                                        terminals.insert(prule);
+                                    }
+                                    if (prule.compare("Epsilon") == 0)
+                                    {
+                                        terminals.insert(prule);
                                     }
                                     rhs.push_back(prule);
                                     pr->setRhs(rhs);
-                                    terminals.insert(prule);
-                                    std::cout << prule << std::endl;
                                 }
                             }
                         }
@@ -155,12 +165,11 @@ public:
                 token = token.substr(pos2 + delimiter2.length());
             }
             if (pr->getLhs() != "")
-            {
+            {   cout << "here" << endl;
                 productionRules.push_back(pr);
             }
             rhs.clear();
-            std::cout << productionRules.size() << std::endl;
-            std::cout << token << std::endl;
+
             input.erase(0, pos1 + delimiter1.length());
         }
         for (ProductionRule *pr : productionRules)
@@ -174,6 +183,22 @@ public:
             else
             {
                 nonTerminals[pr->getLhs()].push_back(pr);
+            }
+        }
+
+        for (const auto &elem : terminals)
+        {
+            cout << elem << endl;
+        }
+
+        for (std::size_t i = 0; i < productionRules.size(); ++i)
+        {
+            std::cout << productionRules[i]->getLhs() << "le"
+                      << "\n";
+            for (std::size_t j = 0; j < productionRules[i]->getRhs().size(); ++j)
+            {
+                std::cout << productionRules[i]->getRhs()[j] << "ri"
+                          << "\n";
             }
         }
     }
