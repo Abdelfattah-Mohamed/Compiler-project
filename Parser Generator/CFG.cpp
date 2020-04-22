@@ -1,6 +1,6 @@
 #include <bits/stdc++.h>
-#include "ProductionRule.cpp"
 #include "../lexical analyzer generator/LexicalGeneratorBuilder.cpp"
+#include "leftRec.cpp"
 using namespace std;
 class CFG
 {
@@ -22,7 +22,7 @@ private:
 public:
     CFG(LexicalGeneratorBuilder *_lex, string _grammerFile)
     {
-       
+
         eps = "Epsilon";
         grammerFile = _grammerFile;
         lexBuilder = _lex;
@@ -31,15 +31,20 @@ public:
     {
         parseGrammerFile(grammerFile);
 
+        eliminateLeftRecursionAndFactor();
+        terminals.insert(eps);
         computeFirstSets();
+
         computeFollowSets();
+        terminals.erase(eps);
         GenerateParseTable();
+
         parseInput();
     }
     // set  DS of terminals and nonterminals and production rules
     void parseGrammerFile(string grammerFile)
     {
-       
+
         string line;
         string input = "";
 
@@ -80,7 +85,8 @@ public:
                     if (flag == 0)
                     {
                         pr->setLhs(prule);
-                        if(!startSymbolSet){
+                        if (!startSymbolSet)
+                        {
                             startSymbolSet = true;
                             startSymbol = prule;
                         }
@@ -119,11 +125,10 @@ public:
                                               << "\n";
                                 }*/
                                 ProductionRule *tempo = new ProductionRule();
-                                tempo ;
+                                tempo;
                                 productionRules.push_back(tempo);
-                                productionRules[productionRules.size()-1]->setLhs(pr->getLhs());
-                                productionRules[productionRules.size()-1]->setRhs(pr->getRhs());
-                                
+                                productionRules[productionRules.size() - 1]->setLhs(pr->getLhs());
+                                productionRules[productionRules.size() - 1]->setRhs(pr->getRhs());
 
                                 rhs.clear();
                                 string lh = pr->getLhs();
@@ -171,7 +176,8 @@ public:
                 token = token.substr(pos2 + delimiter2.length());
             }
             if (pr->getLhs() != "")
-            {   cout << "here" << endl;
+            {
+                cout << "here" << endl;
                 productionRules.push_back(pr);
             }
             rhs.clear();
@@ -191,21 +197,24 @@ public:
                 nonTerminals[pr->getLhs()].push_back(pr);
             }
         }
-
-        for (const auto &elem : terminals)
-        {
-            cout << elem <<" ";
-        }
-        cout<<endl;
-        for (std::size_t i = 0; i < productionRules.size(); ++i)
-        {
-            std::cout << productionRules[i]->getLhs() << ": ";
-            for (std::size_t j = 0; j < productionRules[i]->getRhs().size(); ++j)
-            {
-                std::cout << productionRules[i]->getRhs()[j] <<" " ;
-            }
-            cout<<endl;
-        }
+        // cout << "Terminals : ";
+        // for (const auto &elem : terminals)
+        // {
+        //     cout << elem << " ";
+        // }
+        // cout << endl;
+        // cout << endl;
+        // cout << "nonterminals" << endl;
+        // for (std::size_t i = 0; i < productionRules.size(); ++i)
+        // {
+        //     std::cout << productionRules[i]->getLhs() << ": ";
+        //     for (std::size_t j = 0; j < productionRules[i]->getRhs().size(); ++j)
+        //     {
+        //         std::cout << productionRules[i]->getRhs()[j] << " ";
+        //     }
+        //     cout << endl;
+        // }
+        // cout << endl;
     }
     void computeFirstSets()
     {
@@ -233,17 +242,17 @@ public:
             firstSets[str] = st;
         }
         firstSets.erase(eps);
-        cout << "first sets: " << endl;
-        for (pair<string, unordered_set<string>> ff : firstSets)
-        {
-            cout << ff.first << " : ";
-            for (string sss : ff.second)
-            {
-                cout << sss << " ";
-            }
-            cout << endl;
-        }
-        cout << endl;
+        // cout << "first sets: " << endl;
+        // for (pair<string, unordered_set<string>> ff : firstSets)
+        // {
+        //     cout << ff.first << " : ";
+        //     for (string sss : ff.second)
+        //     {
+        //         cout << sss << " ";
+        //     }
+        //     cout << endl;
+        // }
+        // cout << endl;
     }
     unordered_set<string> recursivefirstSet(string nonTerm, unordered_set<string> &vis)
     {
@@ -338,16 +347,17 @@ public:
                 dfs(node, id, adjList, onStack, ids, lowLink, stack);
             FollowSets[node].erase(eps);
         }
-        cout << "follow sets" << endl;
-        for (pair<string, unordered_set<string>> ff : FollowSets)
-        {
-            cout << ff.first << " : ";
-            for (string sss : ff.second)
-            {
-                cout << sss << " ";
-            }
-            cout << endl;
-        }
+        // cout << "follow sets" << endl;
+        // for (pair<string, unordered_set<string>> ff : FollowSets)
+        // {
+        //     cout << ff.first << " : ";
+        //     for (string sss : ff.second)
+        //     {
+        //         cout << sss << " ";
+        //     }
+        //     cout << endl;
+        // }
+        // cout << endl;
     }
 
     void dfs(string at, int &id, unordered_map<string, unordered_set<string>> &adjList,
@@ -444,6 +454,28 @@ public:
             }
             ll1Table[lhs] = entry;
         }
+        cout << endl
+             << "parse table" << endl;
+        cout << "-----------------------------" << endl;
+        for (auto curr : ll1Table)
+
+        {
+            string row = curr.first;
+            cout << row << endl;
+            unordered_map<string, ProductionRule> cols = curr.second;
+            for (auto entry : cols)
+            {
+                ProductionRule pr = entry.second;
+                vector<string> vct = pr.getRhs();
+                string s = entry.first + " ";
+                for (int counter = 0; counter < vct.size(); counter++)
+                {
+                    s += vct[counter];
+                }
+
+                cout << s << endl;
+            }
+        }
     }
     bool find_pr(string T, ProductionRule *pr_ptr)
     {
@@ -529,7 +561,7 @@ public:
                             string s = pr.getLhs() + " --> ";
                             for (int counter = 0; counter < rhs.size(); counter++)
                             {
-                                s += rhs[counter];
+                                s += (rhs[counter] + " ");
                             }
                             cout << s << endl;
                         }
@@ -540,7 +572,7 @@ public:
                     }
                     else
                     {
-                        cout << "ERROR sync entry: " << top_elem << "missing and discarded from stack" << endl;
+                        cout << "ERROR sync entry: " << top_elem << " missing and discarded from stack" << endl;
                     }
                 }
                 else
@@ -558,11 +590,37 @@ public:
                 }
             }
         }
-    }
-    void eliminateLeftRecursion()
+        }
+    void eliminateLeftRecursionAndFactor()
     {
-    }
-    void eliminateLeftFactor()
-    {
+        leftRec *rec = new leftRec(productionRules);
+        productionRules = rec->get_Rules();
+        nonTerminals = rec->getNonTerminals();
+        // cout << "nonterminals after left factoring" << endl;
+        // for (pair<string, vector<ProductionRule *>> p : nonTerminals)
+        // {
+        //     for (ProductionRule *pr : p.second)
+        //     {
+        //         cout << pr->getLhs() << " -> ";
+        //         for (string s : pr->getRhs())
+        //         {
+        //             cout << s << " ";
+        //         }
+        //         cout << endl;
+        //     }
+        // }
+        // cout << endl;
+        // cout << endl;
+        // cout << "nonterminals" << endl;
+        // for (std::size_t i = 0; i < productionRules.size(); ++i)
+        // {
+        //     std::cout << productionRules[i]->getLhs() << ": ";
+        //     for (std::size_t j = 0; j < productionRules[i]->getRhs().size(); ++j)
+        //     {
+        //         std::cout << productionRules[i]->getRhs()[j] << " ";
+        //     }
+        //     cout << endl;
+        // }
+        // cout << endl;
     }
 };
