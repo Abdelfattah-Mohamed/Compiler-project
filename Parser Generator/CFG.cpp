@@ -457,24 +457,29 @@ public:
         cout << endl
              << "parse table" << endl;
         cout << "-----------------------------" << endl;
+        int cnt0 = 1;
         for (auto curr : ll1Table)
 
         {
             string row = curr.first;
-            cout << row << endl;
+            cout << cnt0 << ". " << row << endl;
             unordered_map<string, ProductionRule> cols = curr.second;
+            char cnt1 = 'a';
             for (auto entry : cols)
             {
                 ProductionRule pr = entry.second;
                 vector<string> vct = pr.getRhs();
-                string s = entry.first + " ";
+                string s = ". " + entry.first + " : ";
+                s = cnt1 + s;
                 for (int counter = 0; counter < vct.size(); counter++)
                 {
-                    s += vct[counter];
+                    s += vct[counter] + " ";
                 }
-
                 cout << s << endl;
+                cnt1++;
             }
+            cnt0++;
+            cout << endl;
         }
     }
     bool find_pr(string T, ProductionRule *pr_ptr)
@@ -590,7 +595,7 @@ public:
                 }
             }
         }
-        }
+    }
     void eliminateLeftRecursionAndFactor()
     {
         leftRec *rec = new leftRec(productionRules);
