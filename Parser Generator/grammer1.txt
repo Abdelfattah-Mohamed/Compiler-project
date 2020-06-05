@@ -1,4 +1,0 @@
-#E = T X
-#T = '(' E ')' | 'int' Y
-#X = '+' E | Epsilon
-#Y = '*' T | Epsilon 

@@ -5,9 +5,9 @@ using namespace std;
 int main()
 {
 
-    LexicalGeneratorBuilder *lex = new LexicalGeneratorBuilder("input.txt", "lex_rules_ip.txt");
+    LexicalGeneratorBuilder *lex = new LexicalGeneratorBuilder("test1.txt", "regularExpressions.txt");
     lex->buildGenerator();
-    CFG *cfg = new CFG(lex, "javaGrammer.txt");
+    CFG *cfg = new CFG(lex, "grammar.txt");
     cfg->BuildParser();
     return 0;
 }
