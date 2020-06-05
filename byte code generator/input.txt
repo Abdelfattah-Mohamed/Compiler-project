@@ -1,0 +1,3 @@
+
+int sum;
+float x;
