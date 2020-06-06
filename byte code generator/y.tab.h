@@ -35,7 +35,7 @@
 /* "%code requires" blocks.  */
 
 /* Line 1676 of yacc.c  */
-#line 63 "syntax.y"
+#line 68 "syntax.y"
 
 	#include <vector>
 	using namespace std;
@@ -63,12 +63,13 @@
      BOOL = 267,
      ARTHOP = 268,
      RELOP = 269,
-     ASSIGN = 270,
-     SEMICOLON = 271,
-     LEFTBRACKET = 272,
-     RIGHTBRACKET = 273,
-     LEFTCURLY = 274,
-     RIGHTCURLY = 275
+     BOOLOP = 270,
+     ASSIGN = 271,
+     SEMICOLON = 272,
+     LEFTBRACKET = 273,
+     RIGHTBRACKET = 274,
+     LEFTCURLY = 275,
+     RIGHTCURLY = 276
    };
 #endif
 /* Tokens.  */
@@ -84,12 +85,13 @@
 #define BOOL 267
 #define ARTHOP 268
 #define RELOP 269
-#define ASSIGN 270
-#define SEMICOLON 271
-#define LEFTBRACKET 272
-#define RIGHTBRACKET 273
-#define LEFTCURLY 274
-#define RIGHTCURLY 275
+#define BOOLOP 270
+#define ASSIGN 271
+#define SEMICOLON 272
+#define LEFTBRACKET 273
+#define RIGHTBRACKET 274
+#define LEFTCURLY 275
+#define RIGHTCURLY 276
 
 
 
@@ -99,7 +101,7 @@ typedef union YYSTYPE
 {
 
 /* Line 1676 of yacc.c  */
-#line 70 "syntax.y"
+#line 75 "syntax.y"
 
     int intVal;
     float floatVal;
@@ -118,7 +120,7 @@ typedef union YYSTYPE
 
 
 /* Line 1676 of yacc.c  */
-#line 122 "y.tab.h"
+#line 124 "y.tab.h"
 } YYSTYPE;
 # define YYSTYPE_IS_TRIVIAL 1
 # define yystype YYSTYPE /* obsolescent; will be withdrawn */

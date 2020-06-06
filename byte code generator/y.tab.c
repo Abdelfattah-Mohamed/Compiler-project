@@ -76,7 +76,7 @@
 #define INTEGER 0
 #define FLOAT 1
 #define BOOLEAN 2
-
+#define ERRTYPE 3
 using namespace std;
 
 extern  int yylex();
@@ -85,6 +85,9 @@ void yyerror(const char * s);
 
 void addLineCode(string x);
 void create_new_var(string id, int type);
+void printCodeLines();
+void backpatch(vector<int> * list ,int index);
+vector<int>* merge(vector<int> *list1 , vector<int> *list2 );
  /* arithmetic operations */
 map<string,string> arith_op = {
    
@@ -118,20 +121,22 @@ map<string,string> f_cond = {
  to a pair of integers first is the index of that variable in the memory 
  it will be used in the rules and the second represents the type of that variable 
  int or float to be tested before generating the rules */
+//  first => index , second =>type
 map<string,pair<int,int>> symbol_table;
 /*holds the current program counter to print it next to instructions and to specify jumps*/
 int PC=0;
 /*represents the index (place) of the var in the memory , will also be used in the instructions*/
 int var_index=0;
+int instrIndex = 0;
 /*holds the string of each line of code */
 vector<string> code_lines;
-
+vector<int>  indexToPC;
 ////TODO put all the functions declarations here
 
 
 
 /* Line 189 of yacc.c  */
-#line 135 "y.tab.c"
+#line 140 "y.tab.c"
 
 /* Enabling traces.  */
 #ifndef YYDEBUG
@@ -154,7 +159,7 @@ vector<string> code_lines;
 /* "%code requires" blocks.  */
 
 /* Line 209 of yacc.c  */
-#line 63 "syntax.y"
+#line 68 "syntax.y"
 
 	#include <vector>
 	using namespace std;
@@ -162,7 +167,7 @@ vector<string> code_lines;
 
 
 /* Line 209 of yacc.c  */
-#line 166 "y.tab.c"
+#line 171 "y.tab.c"
 
 /* Tokens.  */
 #ifndef YYTOKENTYPE
@@ -182,12 +187,13 @@ vector<string> code_lines;
      BOOL = 267,
      ARTHOP = 268,
      RELOP = 269,
-     ASSIGN = 270,
-     SEMICOLON = 271,
-     LEFTBRACKET = 272,
-     RIGHTBRACKET = 273,
-     LEFTCURLY = 274,
-     RIGHTCURLY = 275
+     BOOLOP = 270,
+     ASSIGN = 271,
+     SEMICOLON = 272,
+     LEFTBRACKET = 273,
+     RIGHTBRACKET = 274,
+     LEFTCURLY = 275,
+     RIGHTCURLY = 276
    };
 #endif
 /* Tokens.  */
@@ -203,12 +209,13 @@ vector<string> code_lines;
 #define BOOL 267
 #define ARTHOP 268
 #define RELOP 269
-#define ASSIGN 270
-#define SEMICOLON 271
-#define LEFTBRACKET 272
-#define RIGHTBRACKET 273
-#define LEFTCURLY 274
-#define RIGHTCURLY 275
+#define BOOLOP 270
+#define ASSIGN 271
+#define SEMICOLON 272
+#define LEFTBRACKET 273
+#define RIGHTBRACKET 274
+#define LEFTCURLY 275
+#define RIGHTCURLY 276
 
 
 
@@ -218,7 +225,7 @@ typedef union YYSTYPE
 {
 
 /* Line 214 of yacc.c  */
-#line 70 "syntax.y"
+#line 75 "syntax.y"
 
     int intVal;
     float floatVal;
@@ -237,7 +244,7 @@ typedef union YYSTYPE
 
 
 /* Line 214 of yacc.c  */
-#line 241 "y.tab.c"
+#line 248 "y.tab.c"
 } YYSTYPE;
 # define YYSTYPE_IS_TRIVIAL 1
 # define yystype YYSTYPE /* obsolescent; will be withdrawn */
@@ -249,7 +256,7 @@ typedef union YYSTYPE
 
 
 /* Line 264 of yacc.c  */
-#line 253 "y.tab.c"
+#line 260 "y.tab.c"
 
 #ifdef short
 # undef short
@@ -464,20 +471,20 @@ union yyalloc
 /* YYFINAL -- State number of the termination state.  */
 #define YYFINAL  9
 /* YYLAST -- Last index in YYTABLE.  */
-#define YYLAST   6
+#define YYLAST   9
 
 /* YYNTOKENS -- Number of terminals.  */
-#define YYNTOKENS  21
+#define YYNTOKENS  22
 /* YYNNTS -- Number of nonterminals.  */
-#define YYNNTS  6
+#define YYNNTS  7
 /* YYNRULES -- Number of rules.  */
-#define YYNRULES  9
+#define YYNRULES  10
 /* YYNRULES -- Number of states.  */
-#define YYNSTATES  13
+#define YYNSTATES  15
 
 /* YYTRANSLATE(YYLEX) -- Bison symbol number corresponding to YYLEX.  */
 #define YYUNDEFTOK  2
-#define YYMAXUTOK   275
+#define YYMAXUTOK   276
 
 #define YYTRANSLATE(YYX)						\
   ((unsigned int) (YYX) <= YYMAXUTOK ? yytranslate[YYX] : YYUNDEFTOK)
@@ -512,7 +519,7 @@ static const yytype_uint8 yytranslate[] =
        2,     2,     2,     2,     2,     2,     2,     2,     2,     2,
        2,     2,     2,     2,     2,     2,     1,     2,     3,     4,
        5,     6,     7,     8,     9,    10,    11,    12,    13,    14,
-      15,    16,    17,    18,    19,    20
+      15,    16,    17,    18,    19,    20,    21
 };
 
 #if YYDEBUG
@@ -520,21 +527,23 @@ static const yytype_uint8 yytranslate[] =
    YYRHS.  */
 static const yytype_uint8 yyprhs[] =
 {
-       0,     0,     3,     5,     7,    10,    12,    16,    18,    20
+       0,     0,     3,     6,     7,     9,    13,    15,    19,    21,
+      23
 };
 
 /* YYRHS -- A `-1'-separated list of the rules' RHS.  */
 static const yytype_int8 yyrhs[] =
 {
-      22,     0,    -1,    23,    -1,    24,    -1,    24,    23,    -1,
-      25,    -1,    26,     9,    16,    -1,     3,    -1,     5,    -1,
-       4,    -1
+      23,     0,    -1,    25,    24,    -1,    -1,    26,    -1,    26,
+      24,    25,    -1,    27,    -1,    28,     9,    17,    -1,     3,
+      -1,     5,    -1,     4,    -1
 };
 
 /* YYRLINE[YYN] -- source line where rule number YYN was defined.  */
 static const yytype_uint8 yyrline[] =
 {
-       0,   120,   120,   121,   122,   126,   130,   139,   140,   141
+       0,   123,   123,   128,   137,   138,   147,   153,   162,   163,
+     164
 };
 #endif
 
@@ -545,9 +554,10 @@ static const char *const yytname[] =
 {
   "$end", "error", "$undefined", "int_word", "bool_word", "float_word",
   "if_word", "else_word", "while_word", "IDENTIFIER", "INT", "REAL",
-  "BOOL", "ARTHOP", "RELOP", "ASSIGN", "SEMICOLON", "LEFTBRACKET",
-  "RIGHTBRACKET", "LEFTCURLY", "RIGHTCURLY", "$accept", "METHOD_BODY",
-  "statement_list", "statement", "declaration", "primitive_type", 0
+  "BOOL", "ARTHOP", "RELOP", "BOOLOP", "ASSIGN", "SEMICOLON",
+  "LEFTBRACKET", "RIGHTBRACKET", "LEFTCURLY", "RIGHTCURLY", "$accept",
+  "METHOD_BODY", "marker", "statement_list", "statement", "declaration",
+  "primitive_type", 0
 };
 #endif
 
@@ -558,20 +568,22 @@ static const yytype_uint16 yytoknum[] =
 {
        0,   256,   257,   258,   259,   260,   261,   262,   263,   264,
      265,   266,   267,   268,   269,   270,   271,   272,   273,   274,
-     275
+     275,   276
 };
 # endif
 
 /* YYR1[YYN] -- Symbol number of symbol that rule YYN derives.  */
 static const yytype_uint8 yyr1[] =
 {
-       0,    21,    22,    23,    23,    24,    25,    26,    26,    26
+       0,    22,    23,    24,    25,    25,    26,    27,    28,    28,
+      28
 };
 
 /* YYR2[YYN] -- Number of symbols composing right hand side of rule YYN.  */
 static const yytype_uint8 yyr2[] =
 {
-       0,     2,     1,     1,     2,     1,     3,     1,     1,     1
+       0,     2,     2,     0,     1,     3,     1,     3,     1,     1,
+       1
 };
 
 /* YYDEFACT[STATE-NAME] -- Default rule to reduce with in state
@@ -579,14 +591,14 @@ static const yytype_uint8 yyr2[] =
    means the default is an error.  */
 static const yytype_uint8 yydefact[] =
 {
-       0,     7,     9,     8,     0,     2,     3,     5,     0,     1,
-       4,     0,     6
+       0,     8,    10,     9,     0,     3,     3,     6,     0,     1,
+       2,     0,     0,     5,     7
 };
 
 /* YYDEFGOTO[NTERM-NUM].  */
 static const yytype_int8 yydefgoto[] =
 {
-      -1,     4,     5,     6,     7,     8
+      -1,     4,    10,     5,     6,     7,     8
 };
 
 /* YYPACT[STATE-NUM] -- Index in YYTABLE of the portion describing
@@ -594,37 +606,37 @@ static const yytype_int8 yydefgoto[] =
 #define YYPACT_NINF -12
 static const yytype_int8 yypact[] =
 {
-      -3,   -12,   -12,   -12,     3,   -12,    -3,   -12,    -5,   -12,
-     -12,   -11,   -12
+      -3,   -12,   -12,   -12,     3,   -12,     4,   -12,    -4,   -12,
+     -12,    -3,   -11,   -12,   -12
 };
 
 /* YYPGOTO[NTERM-NUM].  */
 static const yytype_int8 yypgoto[] =
 {
-     -12,   -12,     0,   -12,   -12,   -12
+     -12,   -12,     1,    -2,   -12,   -12,   -12
 };
 
 /* YYTABLE[YYPACT[STATE-NUM]].  What to do in state STATE-NUM.  If
    positive, shift that token.  If negative, reduce the rule which
    number is the opposite.  If zero, do what YYDEFACT says.
    If YYTABLE_NINF, syntax error.  */
-#define YYTABLE_NINF -1
-static const yytype_uint8 yytable[] =
+#define YYTABLE_NINF -5
+static const yytype_int8 yytable[] =
 {
-       1,     2,     3,     9,    11,    12,    10
+       1,     2,     3,     9,    -4,    12,    14,    11,     0,    13
 };
 
-static const yytype_uint8 yycheck[] =
+static const yytype_int8 yycheck[] =
 {
-       3,     4,     5,     0,     9,    16,     6
+       3,     4,     5,     0,     0,     9,    17,     6,    -1,    11
 };
 
 /* YYSTOS[STATE-NUM] -- The (internal number of the) accessing
    symbol of state STATE-NUM.  */
 static const yytype_uint8 yystos[] =
 {
-       0,     3,     4,     5,    22,    23,    24,    25,    26,     0,
-      23,     9,    16
+       0,     3,     4,     5,    23,    25,    26,    27,    28,     0,
+      24,    24,     9,    25,    17
 };
 
 #define yyerrok		(yyerrstatus = 0)
@@ -1435,48 +1447,76 @@ yyreduce:
   YY_REDUCE_PRINT (yyn);
   switch (yyn)
     {
-        case 5:
+        case 2:
 
 /* Line 1455 of yacc.c  */
-#line 126 "syntax.y"
-    {vector<int> * v = new vector<int>(); (yyval.stmt).nextList =v;}
+#line 125 "syntax.y"
+    {
+                backpatch((yyvsp[(1) - (2)].stmt).nextList,(yyvsp[(2) - (2)].intVal));
+            }
+    break;
+
+  case 3:
+
+/* Line 1455 of yacc.c  */
+#line 128 "syntax.y"
+    {
+    (yyval.intVal) = code_lines.size();
+}
+    break;
+
+  case 5:
+
+/* Line 1455 of yacc.c  */
+#line 141 "syntax.y"
+    {
+        backpatch((yyvsp[(1) - (3)].stmt).nextList,(yyvsp[(2) - (3)].intVal));
+        (yyval.stmt).nextList = (yyvsp[(3) - (3)].stmt).nextList;
+    }
     break;
 
   case 6:
 
 /* Line 1455 of yacc.c  */
-#line 132 "syntax.y"
+#line 147 "syntax.y"
+    {vector<int> * v = new vector<int>(); (yyval.stmt).nextList =v;}
+    break;
+
+  case 7:
+
+/* Line 1455 of yacc.c  */
+#line 155 "syntax.y"
     {
         string str((yyvsp[(2) - (3)].id));
         create_new_var(str,(yyvsp[(1) - (3)].primType));
     }
     break;
 
-  case 7:
-
-/* Line 1455 of yacc.c  */
-#line 139 "syntax.y"
-    {(yyval.primType) = INTEGER;}
-    break;
-
   case 8:
 
 /* Line 1455 of yacc.c  */
-#line 140 "syntax.y"
-    {(yyval.primType) = FLOAT;}
+#line 162 "syntax.y"
+    {(yyval.primType) = INTEGER;}
     break;
 
   case 9:
 
 /* Line 1455 of yacc.c  */
-#line 141 "syntax.y"
+#line 163 "syntax.y"
+    {(yyval.primType) = FLOAT;}
+    break;
+
+  case 10:
+
+/* Line 1455 of yacc.c  */
+#line 164 "syntax.y"
     {(yyval.primType) = BOOLEAN;}
     break;
 
 
 
 /* Line 1455 of yacc.c  */
-#line 1480 "y.tab.c"
+#line 1520 "y.tab.c"
       default: break;
     }
   YY_SYMBOL_PRINT ("-> $$ =", yyr1[yyn], &yyval, &yyloc);
@@ -1688,7 +1728,7 @@ yyreturn:
 
 
 /* Line 1675 of yacc.c  */
-#line 145 "syntax.y"
+#line 249 "syntax.y"
 
 
 
@@ -1702,16 +1742,16 @@ void create_new_var(string id, int type){
         // make the default value = 0 and store it in the place of the index of that varibale in memory
         if(type == INTEGER)
 		{
-            addLineCode(to_string(PC)+": iconst_0\n");
+            addLineCode("iconst_0\n");
             PC+=1;
-			addLineCode(to_string(PC)+": istore " + to_string(var_index)+"\n");
+			addLineCode("istore " + to_string(var_index)+"\n");
             PC+=2;
 		}
 		else if ( type == FLOAT)
 		{
-            addLineCode(to_string(PC)+": fconst_0\n");
+            addLineCode("fconst_0\n");
             PC+=1;
-			addLineCode(to_string(PC)+": fstore " + to_string(var_index)+"\n");
+			addLineCode("fstore " + to_string(var_index)+"\n");
             PC+=2;
 		}else{
             return;
@@ -1725,11 +1765,33 @@ void create_new_var(string id, int type){
 void addLineCode(string x)
 {
 	code_lines.push_back(x);
+    indexToPC.push_back(PC);
 }
-void yyerror (char const *s)
+void yyerror(char const *s)
 {
   fprintf (stderr, "%s\n", s);
 }
+void backpatch(vector<int> * list ,int index){
+    if(list == nullptr)
+        return;
+    for(int i =0 ; i < list->size();i++){
+        code_lines[(*list)[i]] +=(" " +to_string(indexToPC[index])); 
+    }
+}
+vector<int> * merge(vector<int> * list1 , vector<int> * list2){
+    
+    vector<int> *newlist =  new vector<int> ();
+    if(list1 != nullptr && list2 != nullptr){
+        newlist->insert(newlist->end(),list1->begin() , list1->end());
+        newlist->insert(newlist->end(),list2->begin() , list2->end());
+    }else if(list1 != nullptr){
+        newlist->insert(newlist->end(),list1->begin() , list1->end());
+    }else  if(list2 != nullptr){
+        newlist->insert(newlist->end(),list2->begin() , list2->end());
+    }
+    return newlist;
+}
+
 main(int argv , char *argc[]){
     
 	FILE *myfile;
@@ -1744,8 +1806,11 @@ main(int argv , char *argc[]){
 	}
 	yyin = myfile;
     yyparse();
-    for(string s : code_lines){
-        cout<<s<<endl;
+    printCodeLines();
+}
+void printCodeLines(){
+    for(int i = 0 ; i < code_lines.size(); i++){
+        cout<< ( to_string(indexToPC[i])+" : "+ code_lines[i]);
     }
 }
 

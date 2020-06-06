@@ -1,3 +1,2 @@
-
 int sum;
 float x;
