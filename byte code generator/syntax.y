@@ -125,12 +125,12 @@ METHOD_BODY: statement_list
             {
                 backpatch($1.nextList,$2);
             };
-marker:{
+marker:{/*save the index to use it to get the pc*/
     $$ = code_lines.size();
 };
 goto:
-{
-	$$ = codeList.size();
+{/*save the index to access the goto line code */
+	$$ = code_lines.size();
 	addLineCode("goto ");
     PC +=3;
 };
@@ -163,6 +163,71 @@ primitive_type:
 	| float_word {$$ = FLOAT;}
 	| bool_word {$$ = BOOLEAN;}
 	;
+
+if:
+    if_word LEFTBRACKET
+    boolExpression
+    RIGHTBRACKET LEFTCURLY
+    marker
+    statement_list
+    goto
+    RIGHTCURLY
+    else_word LEFTCURLY
+    marker
+    statement_list
+    RIGHTCURLY
+    {
+     backpatch($3.trueList,$6);
+     backpatch($3.falseList,$12);
+     $$.nextList = merge($7.nextList,$13.nextList);
+     $$.nextList->push_back($8);   
+    }
+    |
+    if_word LEFTBRACKET
+    boolExpression
+    RIGHTBRACKET LEFTCURLY
+    marker
+    statement_list
+    RIGHTCURLY
+    {
+     backpatch($3.trueList,$6);
+     $$.nextList = merge($7.nextList,$3.falseList);   
+    }
+    ;
+while:
+while_word LEFTBRACKET
+marker
+boolExpression
+RIGHTBRACKET LEFTCURLY
+marker
+statement_list
+{
+    addLineCode("goto " + to_string(indexToPC($3)));
+    PC +=3;
+}
+RIGHTCURLY
+{
+    backpatch($4.trueList,$7);
+    backpatch($8.nextList,$3);
+    $$.nextList = $4.falseList;
+
+
+}
+;
+
+assignment:
+IDENTIFIER ASSIGN expression SEMICOLON
+{
+     if(symbol_table.count($1)){
+     }else{
+        string error = "id not defined"
+        yyerror(error.c_str());
+        $$ = ERRTYPE;
+     }
+}
+
+
+
 expression: INT 
                 {
                 $$ = INTEGER; 
