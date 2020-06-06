@@ -286,13 +286,13 @@ static void yy_fatal_error YY_PROTO(( yyconst char msg[] ));
 #define YY_END_OF_BUFFER 25
 static yyconst short int yy_accept[69] =
     {   0,
-        0,    0,   25,   23,    8,    9,   23,   23,   15,   16,
-       19,   19,   10,   14,   21,   20,   21,   13,   13,   13,
-       13,   13,   13,   13,   17,   23,   18,   21,   22,   10,
-        0,   10,   13,   13,   13,   13,   13,   13,    4,   13,
-       13,   13,   11,   10,   13,   13,   13,   13,    7,    1,
-       13,   13,    0,    0,   13,    5,   13,   13,   12,   13,
-       11,   11,   13,    3,    6,   13,    2,    0
+        0,    0,   25,   23,   21,   22,   23,   23,   13,   14,
+       17,   17,    8,   12,   19,   18,   19,   11,   11,   11,
+       11,   11,   11,   11,   15,   23,   16,   19,   20,    8,
+        0,    8,   11,   11,   11,   11,   11,   11,    4,   11,
+       11,   11,    9,    8,   11,   11,   11,   11,    7,    1,
+       11,   11,    0,    0,   11,    5,   11,   11,   10,   11,
+        9,    9,   11,    3,    6,   11,    2,    0
     } ;
 
 static yyconst int yy_ec[256] =
@@ -683,77 +683,77 @@ YY_RULE_SETUP
 case 8:
 YY_RULE_SETUP
 #line 33 "lex.l"
-{}
+{yylval.intVal =  atoi(yytext);  return INT;}
 	YY_BREAK
 case 9:
 YY_RULE_SETUP
 #line 34 "lex.l"
-{}
+{yylval.floatVal = atof(yytext); return REAL;}
 	YY_BREAK
 case 10:
 YY_RULE_SETUP
 #line 35 "lex.l"
-{yylval.intVal =  atoi(yytext);  return INT;}
+{yylval.boolVal = (strcmp(strdup(yytext),"true") ? 1 : 0); return BOOL;}
 	YY_BREAK
 case 11:
 YY_RULE_SETUP
 #line 36 "lex.l"
-{yylval.floatVal = atof(yytext); return REAL;}
+{yylval.id = strdup(yytext); return IDENTIFIER;}
 	YY_BREAK
 case 12:
 YY_RULE_SETUP
 #line 37 "lex.l"
-{yylval.boolVal = (strcmp(strdup(yytext),"true") ? 1 : 0); return BOOL;}
+{return SEMICOLON;}
 	YY_BREAK
 case 13:
 YY_RULE_SETUP
 #line 38 "lex.l"
-{yylval.id = strdup(yytext); return IDENTIFIER;}
+{return LEFTBRACKET;}
 	YY_BREAK
 case 14:
 YY_RULE_SETUP
 #line 39 "lex.l"
-{return SEMICOLON;}
+{return RIGHTBRACKET;}
 	YY_BREAK
 case 15:
 YY_RULE_SETUP
 #line 40 "lex.l"
-{return LEFTBRACKET;}
+{return LEFTCURLY;}
 	YY_BREAK
 case 16:
 YY_RULE_SETUP
 #line 41 "lex.l"
-{return RIGHTBRACKET;}
+{return RIGHTCURLY;}
 	YY_BREAK
 case 17:
 YY_RULE_SETUP
 #line 42 "lex.l"
-{return LEFTCURLY;}
+{yylval.op = strdup(yytext); return ARTHOP;}
 	YY_BREAK
 case 18:
 YY_RULE_SETUP
 #line 43 "lex.l"
-{return RIGHTCURLY;}
+{return ASSIGN;}
 	YY_BREAK
 case 19:
 YY_RULE_SETUP
 #line 44 "lex.l"
-{yylval.op = strdup(yytext); return ARTHOP;}
+{yylval.op = strdup(yytext); return RELOP;}
 	YY_BREAK
 case 20:
 YY_RULE_SETUP
 #line 45 "lex.l"
-{return ASSIGN;}
+{yylval.op = strdup(yytext); return BOOLOP;}
 	YY_BREAK
 case 21:
 YY_RULE_SETUP
 #line 46 "lex.l"
-{yylval.op = strdup(yytext); return RELOP;}
+{}
 	YY_BREAK
 case 22:
 YY_RULE_SETUP
 #line 47 "lex.l"
-{yylval.op = strdup(yytext); return BOOLOP;}
+{}
 	YY_BREAK
 case 23:
 YY_RULE_SETUP
