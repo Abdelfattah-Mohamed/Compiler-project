@@ -18,6 +18,7 @@ REAL            ("+"|"-")?{digits}.{digits}("E"{digits}+)?
 id				{letter}({letter}|{digit})*
 arthop			("+"|"-"|"*"|"/")
 boolop			("||"|"&&")
+boolnot			"!"
 assign			"="
 relop			("=="|"!="|">"|">="|"<"|"<=")	
 whitespace		(\t|" "|\r)
@@ -43,6 +44,7 @@ newline			\n
 {assign}				{return ASSIGN;}
 {relop}                 {yylval.op = strdup(yytext); return RELOP;}
 {boolop}				{yylval.op = strdup(yytext); return BOOLOP;}
+{boolnot}				{yylval.op = strdup(yytext); return BOOLNOT;}
 {whitespace}			{}
 {newline}				{}
 . 						{}

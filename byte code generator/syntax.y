@@ -11,7 +11,6 @@ using namespace std;
 extern  int yylex();
 extern  FILE *yyin;
 void yyerror(const char * s);
-
 void addLineCode(string x);
 void create_new_var(string id, int type);
 void printCodeLines();
@@ -59,6 +58,7 @@ int var_index=0;
 int instrIndex = 0;
 /*holds the string of each line of code */
 vector<string> code_lines;
+vector<string> jasmin_lines;
 vector<int>  indexToPC;
 ////TODO put all the functions declarations here
 
@@ -101,6 +101,7 @@ vector<int>  indexToPC;
 %token <op> ARTHOP
 %token <op> RELOP
 %token <op> BOOLOP
+%token <op> BOOLNOT
 %token ASSIGN
 %token  SEMICOLON
 %token  LEFTBRACKET
@@ -355,6 +356,17 @@ boolExpression:
             addLineCode("goto ");
             PC+=3;
         }
+        |LEFTBRACKET boolExpression RIGHTBRACKET
+        {
+            $$.trueList = $2.trueList;
+            $$.falseList = $2.falseList;
+        }
+        | BOOLNOT boolExpression
+        {
+            $$.trueList = $2.falseList;
+            $$.falseList = $2.trueList; 
+        }
+        ;
 
 %%
 
@@ -391,7 +403,6 @@ void create_new_var(string id, int type){
 
 void addLineCode(string x)
 {
-
 	code_lines.push_back(x);
     indexToPC.push_back(PC);
 }
@@ -436,10 +447,10 @@ main(int argv , char *argc[]){
     yyparse();
     printCodeLines();
 }
+
 void printCodeLines(){
     freopen("output.txt" , "w" , stdout);
     for(int i = 0 ; i < code_lines.size(); i++){
         cout<< ( to_string(indexToPC[i])+" : "+ code_lines[i]) <<endl;
     }
 }
-

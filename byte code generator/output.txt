@@ -55,3 +55,5 @@
 110 : iadd
 111 : istore 2
 113 : goto  96
+116 : iconst_0
+117 : istore 4

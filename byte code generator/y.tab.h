@@ -65,12 +65,13 @@
      ARTHOP = 269,
      RELOP = 270,
      BOOLOP = 271,
-     ASSIGN = 272,
-     SEMICOLON = 273,
-     LEFTBRACKET = 274,
-     RIGHTBRACKET = 275,
-     LEFTCURLY = 276,
-     RIGHTCURLY = 277
+     BOOLNOT = 272,
+     ASSIGN = 273,
+     SEMICOLON = 274,
+     LEFTBRACKET = 275,
+     RIGHTBRACKET = 276,
+     LEFTCURLY = 277,
+     RIGHTCURLY = 278
    };
 #endif
 /* Tokens.  */
@@ -88,12 +89,13 @@
 #define ARTHOP 269
 #define RELOP 270
 #define BOOLOP 271
-#define ASSIGN 272
-#define SEMICOLON 273
-#define LEFTBRACKET 274
-#define RIGHTBRACKET 275
-#define LEFTCURLY 276
-#define RIGHTCURLY 277
+#define BOOLNOT 272
+#define ASSIGN 273
+#define SEMICOLON 274
+#define LEFTBRACKET 275
+#define RIGHTBRACKET 276
+#define LEFTCURLY 277
+#define RIGHTCURLY 278
 
 
 
@@ -122,7 +124,7 @@ typedef union YYSTYPE
 
 
 /* Line 1676 of yacc.c  */
-#line 126 "y.tab.h"
+#line 128 "y.tab.h"
 } YYSTYPE;
 # define YYSTYPE_IS_TRIVIAL 1
 # define yystype YYSTYPE /* obsolescent; will be withdrawn */
