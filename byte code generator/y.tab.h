@@ -57,19 +57,20 @@
      if_word = 261,
      else_word = 262,
      while_word = 263,
-     IDENTIFIER = 264,
-     INT = 265,
-     REAL = 266,
-     BOOL = 267,
-     ARTHOP = 268,
-     RELOP = 269,
-     BOOLOP = 270,
-     ASSIGN = 271,
-     SEMICOLON = 272,
-     LEFTBRACKET = 273,
-     RIGHTBRACKET = 274,
-     LEFTCURLY = 275,
-     RIGHTCURLY = 276
+     for_word = 264,
+     IDENTIFIER = 265,
+     INT = 266,
+     REAL = 267,
+     BOOL = 268,
+     ARTHOP = 269,
+     RELOP = 270,
+     BOOLOP = 271,
+     ASSIGN = 272,
+     SEMICOLON = 273,
+     LEFTBRACKET = 274,
+     RIGHTBRACKET = 275,
+     LEFTCURLY = 276,
+     RIGHTCURLY = 277
    };
 #endif
 /* Tokens.  */
@@ -79,19 +80,20 @@
 #define if_word 261
 #define else_word 262
 #define while_word 263
-#define IDENTIFIER 264
-#define INT 265
-#define REAL 266
-#define BOOL 267
-#define ARTHOP 268
-#define RELOP 269
-#define BOOLOP 270
-#define ASSIGN 271
-#define SEMICOLON 272
-#define LEFTBRACKET 273
-#define RIGHTBRACKET 274
-#define LEFTCURLY 275
-#define RIGHTCURLY 276
+#define for_word 264
+#define IDENTIFIER 265
+#define INT 266
+#define REAL 267
+#define BOOL 268
+#define ARTHOP 269
+#define RELOP 270
+#define BOOLOP 271
+#define ASSIGN 272
+#define SEMICOLON 273
+#define LEFTBRACKET 274
+#define RIGHTBRACKET 275
+#define LEFTCURLY 276
+#define RIGHTCURLY 277
 
 
 
@@ -120,7 +122,7 @@ typedef union YYSTYPE
 
 
 /* Line 1676 of yacc.c  */
-#line 124 "y.tab.h"
+#line 126 "y.tab.h"
 } YYSTYPE;
 # define YYSTYPE_IS_TRIVIAL 1
 # define yystype YYSTYPE /* obsolescent; will be withdrawn */

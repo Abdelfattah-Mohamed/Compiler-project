@@ -93,6 +93,7 @@ vector<int>  indexToPC;
 %token if_word
 %token else_word
 %token while_word
+%token for_word
 %token<id> IDENTIFIER   
 %token <intVal> INT
 %token <floatVal> REAL
@@ -106,14 +107,15 @@ vector<int>  indexToPC;
 %token RIGHTBRACKET
 %token LEFTCURLY
 %token RIGHTCURLY
-%type <extype> expression
+%type <exType> expression
 %type <boolEx> boolExpression
-
+%type <intVal> assignment
 %type <primType> primitive_type
 %type <stmt>  statement
 %type <stmt>  statement_list
-// %type <stmt> if
-// %type <stmt> while
+%type <stmt> if
+%type <stmt> while
+%type <stmt> for
 %type <intVal> marker
 %type <intVal> goto
 
@@ -123,13 +125,13 @@ vector<int>  indexToPC;
 METHOD_BODY: statement_list 
             marker
             {
+                indexToPC.push_back(PC);
                 backpatch($1.nextList,$2);
-            };
+            };  
 marker:{/*save the index to use it to get the pc*/
     $$ = code_lines.size();
 };
-goto:
-{/*save the index to access the goto line code */
+goto:{/*save the index to access the goto line code */
 	$$ = code_lines.size();
 	addLineCode("goto ");
     PC +=3;
@@ -145,9 +147,10 @@ statement_list: statement |
 
 statement: 
 	declaration {vector<int> * v = new vector<int>(); $$.nextList =v;}
-	// |if {$$.nextList = $1.nextList;}
-	// |while 	{$$.nextList = $1.nextList;}
-	// | assignment {vector<int> * v = new vector<int>(); $$.nextList =v;}
+	|if {$$.nextList = $1.nextList;}
+	|while 	{$$.nextList = $1.nextList;}
+	| assignment {vector<int> * v = new vector<int>(); $$.nextList =v;}
+    |for {$$.nextList = $1.nextList;}
 	;
 declaration: 
 	primitive_type IDENTIFIER SEMICOLON
@@ -201,57 +204,98 @@ boolExpression
 RIGHTBRACKET LEFTCURLY
 marker
 statement_list
-{
-    addLineCode("goto " + to_string(indexToPC($3)));
-    PC +=3;
-}
 RIGHTCURLY
 {
+    addLineCode( "goto " + to_string(indexToPC[$3]) );
+    PC +=3;
     backpatch($4.trueList,$7);
     backpatch($8.nextList,$3);
     $$.nextList = $4.falseList;
-
-
+    
 }
 ;
-
+for:
+    for_word
+    LEFTBRACKET
+    assignment
+    marker
+    boolExpression
+    SEMICOLON
+    marker
+    assignment
+    goto
+    RIGHTBRACKET
+    LEFTCURLY
+    marker
+    statement_list
+    goto
+    RIGHTCURLY
+    {
+        backpatch($5.trueList, $12);
+        vector<int> *arr =  new vector<int> ();
+        arr->push_back($9);
+        backpatch(arr, $4);
+        arr = new vector<int> ();
+        arr->push_back($14);
+        backpatch(arr,$7);
+        backpatch($13.nextList, $7);
+        $$.nextList = $5.falseList;
+    };
 assignment:
 IDENTIFIER ASSIGN expression SEMICOLON
 {
      if(symbol_table.count($1)){
+         if($3 == symbol_table[$1].second){
+                if($3 == INTEGER){
+                    addLineCode("istore " + to_string(symbol_table[$1].first) );
+                    PC += 2;
+                }else if($3 == FLOAT){
+                    addLineCode("fstore " + to_string(symbol_table[$1].first) );
+                    PC += 2;
+                }else{
+                     string error = "id not defined";
+                    yyerror(error.c_str());
+                    $$ = ERRTYPE;  
+                }
+         }else{
+             printf("no casting");
+         }
      }else{
-        string error = "id not defined"
+        string error = "id not defined";
         yyerror(error.c_str());
         $$ = ERRTYPE;
      }
-}
-
+};
 
 
 expression: INT 
                 {
                 $$ = INTEGER; 
                 addLineCode("ldc " + to_string($1)); 
-                pc+=2;}
+                PC+=2;}
             | REAL 
-                {$$ = FLOAT; 
+                {
+                    $$ = FLOAT; 
                 addLineCode("ldc " + to_string($1));
-                pc+=2;}
+                PC+=2;}
             | expression ARTHOP expression
             {
                     if($1 ==  $3){
                         if($1 == INTEGER){
                             $$ = INTEGER;
-                            addLineCode(i_cond[$2]);
+                            string key =$2;
+                            addLineCode("i" +arith_op[key]);
                         }else{
                              $$ = FLOAT;
-                             addLineCode(f_cond[$2]);
+                              string key =$2;
+                            addLineCode("f" +arith_op[key]);
                         }
-                        pc += 1;
+                        PC += 1;
                     }else{
                         $$ = FLOAT;
-                        addLineCode(f_cond[$2]); 
-                        pc += 1; 
+                         string key =$2;
+                        addLineCode("f" + arith_op[key]);
+                        PC += 1; 
                     }
             }
             | IDENTIFIER
@@ -264,9 +308,9 @@ expression: INT
                     }else if(p.second == FLOAT){
                         addLineCode("fload "  + to_string(p.first)); 
                     }
-                    pc +=2;
+                    PC +=2;
                 }else{
-                    string error = "id not defined"
+                    string error = "id not defined";
                     yyerror(error.c_str());
                     $$ = ERRTYPE;
                 }
@@ -296,8 +340,8 @@ boolExpression:
                 $$.falseList = $4.falseList;
             }else {
                 backpatch($1.trueList, $3);
-                $$.trueList = $3.trueList;
-                $$.falseList = merge($1.falseList, $3.falseList);
+                $$.trueList = $4.trueList;
+                $$.falseList = merge($1.falseList, $4.falseList);
             }
         }
         | expression RELOP expression 
@@ -305,10 +349,11 @@ boolExpression:
             $$.trueList->push_back(code_lines.size());
             $$.falseList = new vector<int>(); 
             $$.falseList->push_back(code_lines.size()+1);
-            addLineCode(i_cond[$2] + " ");
-            pc+=3;
+            string key = $2;
+            addLineCode(i_cond[key] + " ");
+            PC+=3;
             addLineCode("goto ");
-            pc+=3;
+            PC+=3;
         }
 
 %%
@@ -324,16 +369,16 @@ void create_new_var(string id, int type){
         // make the default value = 0 and store it in the place of the index of that varibale in memory
         if(type == INTEGER)
 		{
-            addLineCode("iconst_0\n");
+            addLineCode("iconst_0");
             PC+=1;
-			addLineCode("istore " + to_string(var_index)+"\n");
+			addLineCode("istore " + to_string(var_index));
             PC+=2;
 		}
 		else if ( type == FLOAT)
 		{
-            addLineCode("fconst_0\n");
+            addLineCode("fconst_0");
             PC+=1;
-			addLineCode("fstore " + to_string(var_index)+"\n");
+			addLineCode("fstore " + to_string(var_index));
             PC+=2;
 		}else{
             return;
@@ -346,6 +391,7 @@ void create_new_var(string id, int type){
 
 void addLineCode(string x)
 {
+
 	code_lines.push_back(x);
     indexToPC.push_back(PC);
 }
@@ -357,7 +403,7 @@ void backpatch(vector<int> * list ,int index){
     if(list == nullptr)
         return;
     for(int i =0 ; i < list->size();i++){
-        code_lines[(*list)[i]] +=(" " +to_string(indexToPC[index])); 
+        code_lines[(*list)[i]] +=(" " +to_string(indexToPC[index]) ); 
     }
 }
 vector<int> * merge(vector<int> * list1 , vector<int> * list2){
@@ -391,8 +437,9 @@ main(int argv , char *argc[]){
     printCodeLines();
 }
 void printCodeLines(){
+    freopen("output.txt" , "w" , stdout);
     for(int i = 0 ; i < code_lines.size(); i++){
-        cout<< ( to_string(indexToPC[i])+" : "+ code_lines[i]);
+        cout<< ( to_string(indexToPC[i])+" : "+ code_lines[i]) <<endl;
     }
 }
 

@@ -5,6 +5,7 @@
 if_t			"if"
 while_t			"while"
 else_t			"else"
+for_t			"for"
 boolean			"boolean"
 int 			"int"
 float			"float"
@@ -28,6 +29,7 @@ newline			\n
 {if_t}					{return  if_word;}
 {else_t}				{return else_word;}
 {while_t}				{return while_word;}
+{for_t}					{return for_word;}
 {whitespace}			{}
 {newline}				{}
 {INTEGER}				{yylval.intVal =  atoi(yytext);  return INT;}
