@@ -28,11 +28,11 @@ newline			\n
 {boolean}				{return bool_word;}
 {float}					{return float_word;}
 {if_t}					{return  if_word;}
-{else_t}				{return else_word;}
+{else_t}				{return else_word; }
 {while_t}				{return while_word;}
 {for_t}					{return for_word;}
-{INTEGER}				{yylval.intVal =  atoi(yytext);  return INT;}
 {REAL}                  {yylval.floatVal = atof(yytext); return REAL;}
+{INTEGER}				{yylval.intVal =  atoi(yytext);  return INT;}
 {BOOL}                  {yylval.boolVal = (strcmp(strdup(yytext),"true") ? 1 : 0); return BOOL;}
 {id}					{yylval.id = strdup(yytext); return IDENTIFIER;}
 ";"                     {return SEMICOLON;}

@@ -40,7 +40,7 @@ map<string,string> f_cond = {
     {"<=", "ifle"},
     {">=", "ifge"},
     {"!=", "ifne"},
-    {"+=", "ifeq"},
+    {"==", "ifeq"},
     {">", "ifgt"},
     {"<", "iflt"}
 };
@@ -186,18 +186,9 @@ if:
      $$.nextList = merge($7.nextList,$13.nextList);
      $$.nextList->push_back($8);   
     }
-    |
-    if_word LEFTBRACKET
-    boolExpression
-    RIGHTBRACKET LEFTCURLY
-    marker
-    statement_list
-    RIGHTCURLY
-    {
-     backpatch($3.trueList,$6);
-     $$.nextList = merge($7.nextList,$3.falseList);   
-    }
+  
     ;
+
 while:
 while_word LEFTBRACKET
 marker
@@ -276,7 +267,7 @@ expression: INT
                 PC+=2;}
             | REAL 
                 {
-                    $$ = FLOAT; 
+                $$ = FLOAT; 
                 addLineCode("ldc " + to_string($1));
                 PC+=2;}
             | expression ARTHOP expression
@@ -347,11 +338,19 @@ boolExpression:
         }
         | expression RELOP expression 
         {   $$.trueList = new vector<int>();
-            $$.trueList->push_back(code_lines.size());
             $$.falseList = new vector<int>(); 
-            $$.falseList->push_back(code_lines.size()+1);
             string key = $2;
-            addLineCode(i_cond[key] + " ");
+            if($1 == FLOAT || ($3 == FLOAT && $1 != ERRTYPE)){
+                $$.trueList->push_back(code_lines.size()+1);
+                $$.falseList->push_back(code_lines.size()+2);
+                addLineCode("fcmpl ");
+                PC++ ;
+                addLineCode(f_cond[key] + " ");
+            }else if ($1 == INTEGER && $3 == INTEGER){
+                $$.trueList->push_back(code_lines.size());
+                $$.falseList->push_back(code_lines.size()+1);
+                addLineCode(i_cond[key] + " ");
+            }
             PC+=3;
             addLineCode("goto ");
             PC+=3;
@@ -454,3 +453,14 @@ void printCodeLines(){
         cout<< ( to_string(indexToPC[i])+" : "+ code_lines[i]) <<endl;
     }
 }
+  // |
+    // if_word LEFTBRACKET
+    // boolExpression
+    // RIGHTBRACKET LEFTCURLY
+    // marker
+    // statement_list
+    // RIGHTCURLY
+    // {
+    //  backpatch($3.trueList,$6);
+    //  $$.nextList = merge($7.nextList,$3.falseList);   
+    // }

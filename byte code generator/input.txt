@@ -4,12 +4,14 @@ x = 10.1 + 1.5;
 sum = 45;
 if(sum > 12){
     sum = 0;
+} else { 
+    sum = 0;
 }
 int i;
 i = 5;
 int c ;
 c = 7; 
-while(i > 0  && c < 10){
+while(i > 0  && c < 10.5){
     i = i - 1;
     c = c + 1;
 }

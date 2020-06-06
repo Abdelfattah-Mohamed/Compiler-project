@@ -11,49 +11,53 @@
 17 : iload 0
 19 : ldc 12
 21 : if_icmpgt  27
-24 : goto  31
+24 : goto  34
 27 : ldc 0
 29 : istore 0
-31 : iconst_0
-32 : istore 2
-34 : ldc 5
-36 : istore 2
+31 : goto  38
+34 : ldc 0
+36 : istore 0
 38 : iconst_0
-39 : istore 3
-41 : ldc 7
-43 : istore 3
-45 : iload 2
-47 : ldc 0
-49 : if_icmpgt  55
-52 : goto  82
-55 : iload 3
-57 : ldc 10
-59 : if_icmplt  65
-62 : goto  82
-65 : iload 2
-67 : ldc 1
-69 : isub
-70 : istore 2
-72 : iload 3
-74 : ldc 1
-76 : iadd
-77 : istore 3
-79 : goto 45
-82 : ldc 0
-84 : istore 2
-86 : iload 2
-88 : ldc 10
-90 : if_icmplt  106
-93 : goto  116
-96 : iload 2
-98 : ldc 1
-100 : iadd
-101 : istore 2
-103 : goto  86
-106 : iload 2
-108 : ldc 1
-110 : iadd
-111 : istore 2
-113 : goto  96
-116 : iconst_0
-117 : istore 4
+39 : istore 2
+41 : ldc 5
+43 : istore 2
+45 : iconst_0
+46 : istore 3
+48 : ldc 7
+50 : istore 3
+52 : iload 2
+54 : ldc 0
+56 : if_icmpgt  62
+59 : goto  90
+62 : iload 3
+64 : ldc 10.500000
+66 : fcmpl 
+67 : iflt  73
+70 : goto  90
+73 : iload 2
+75 : ldc 1
+77 : isub
+78 : istore 2
+80 : iload 3
+82 : ldc 1
+84 : iadd
+85 : istore 3
+87 : goto 52
+90 : ldc 0
+92 : istore 2
+94 : iload 2
+96 : ldc 10
+98 : if_icmplt  114
+101 : goto  124
+104 : iload 2
+106 : ldc 1
+108 : iadd
+109 : istore 2
+111 : goto  94
+114 : iload 2
+116 : ldc 1
+118 : iadd
+119 : istore 2
+121 : goto  104
+124 : iconst_0
+125 : istore 4

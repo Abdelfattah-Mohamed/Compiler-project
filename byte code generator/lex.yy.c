@@ -287,12 +287,12 @@ static void yy_fatal_error YY_PROTO(( yyconst char msg[] ));
 static yyconst short int yy_accept[69] =
     {   0,
         0,    0,   26,   24,   22,   23,   21,   24,   13,   14,
-       17,   17,    8,   12,   19,   18,   19,   11,   11,   11,
-       11,   11,   11,   11,   15,   24,   16,   19,   20,    8,
-        0,    8,   11,   11,   11,   11,   11,   11,    4,   11,
-       11,   11,    9,    8,   11,   11,   11,   11,    7,    1,
+       17,   17,    9,   12,   19,   18,   19,   11,   11,   11,
+       11,   11,   11,   11,   15,   24,   16,   19,   20,    9,
+        0,    9,   11,   11,   11,   11,   11,   11,    4,   11,
+       11,   11,    8,    8,   11,   11,   11,   11,    7,    1,
        11,   11,    0,    0,   11,    5,   11,   11,   10,   11,
-        9,    9,   11,    3,    6,   11,    2,    0
+        8,    8,   11,    3,    6,   11,    2,    0
     } ;
 
 static yyconst int yy_ec[256] =
@@ -668,7 +668,7 @@ YY_RULE_SETUP
 case 5:
 YY_RULE_SETUP
 #line 31 "lex.l"
-{return else_word;}
+{return else_word; }
 	YY_BREAK
 case 6:
 YY_RULE_SETUP
@@ -683,12 +683,12 @@ YY_RULE_SETUP
 case 8:
 YY_RULE_SETUP
 #line 34 "lex.l"
-{yylval.intVal =  atoi(yytext);  return INT;}
+{yylval.floatVal = atof(yytext); return REAL;}
 	YY_BREAK
 case 9:
 YY_RULE_SETUP
 #line 35 "lex.l"
-{yylval.floatVal = atof(yytext); return REAL;}
+{yylval.intVal =  atoi(yytext);  return INT;}
 	YY_BREAK
 case 10:
 YY_RULE_SETUP
